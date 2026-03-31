@@ -81,6 +81,55 @@ if [ -n "$EXE_DIST" ]; then
     echo "  [✓] Exe di-rename → juragan-kos.exe"
 fi
 
+# --- Buat CARA-INSTALL.txt ---
+cat > "$DIST_DIR/$APP/CARA-INSTALL.txt" << 'INSTALL'
+================================================================
+  CARA INSTALL — JURAGAN KOS
+================================================================
+
+1. Ekstrak seluruh folder "JuraganKos" ke lokasi yang diinginkan
+   (misal: D:\JuraganKos atau di Desktop)
+
+2. Buka folder JuraganKos, lalu double-click "juragan-kos.exe"
+
+3. PENTING — Jika muncul "Windows protected your PC":
+
+   a. Klik "More info" (tulisan biru di bawah pesan)
+   b. Klik tombol "Run anyway"
+   c. Peringatan ini HANYA muncul sekali di pertama kali
+
+   Kenapa muncul?
+   Windows SmartScreen memblokir aplikasi yang belum dikenal.
+   Ini bukan virus — aplikasi ini berjalan 100% offline di
+   komputer Anda tanpa mengirim data ke mana pun.
+
+4. Jika Windows Defender memblokir:
+
+   a. Buka Windows Security → Virus & threat protection
+   b. Klik "Protection history"
+   c. Cari file juragan-kos.exe → klik "Actions" → "Allow"
+
+   Atau tambahkan folder JuraganKos ke exclusion:
+   a. Windows Security → Virus & threat protection → Manage settings
+   b. Scroll ke "Exclusions" → "Add or remove exclusions"
+   c. Klik "Add an exclusion" → "Folder" → pilih folder JuraganKos
+
+5. Aplikasi siap digunakan!
+   Database otomatis dibuat saat pertama kali dibuka.
+
+================================================================
+  TIPS
+================================================================
+
+- JANGAN hapus file/folder lain selain CARA-INSTALL.txt
+- Untuk backup data: salin file "www\database\juragan_kos.db"
+- Untuk restore: timpa file database dengan file backup
+- Foto KTP tersimpan di folder "www\uploads\ktp"
+
+================================================================
+INSTALL
+echo "  [✓] CARA-INSTALL.txt dibuat"
+
 echo ""
 echo "  ══════════════════════════════════════"
 echo "  BUILD SELESAI!"
