@@ -4,7 +4,7 @@ $base_url = '.';
 require_once 'config/database.php';
 
 // Auto-seed: hanya jika database benar-benar baru (belum pernah di-seed atau di-reset)
-$ada_properti = $db->querySingle("SELECT COUNT(*) FROM properti");
+$ada_properti = dbValue("SELECT COUNT(*) FROM properti");
 $pernah_reset = getPengaturan($db, 'sudah_reset');
 if ($ada_properti == 0 && !$pernah_reset) {
     require_once 'seed.php';
@@ -24,21 +24,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Update nominal & status
         $stmt = $db->prepare("UPDATE tagihan_operasional SET nominal = :nom, status = 'Sudah Bayar', tanggal_bayar = :tgl WHERE id = :id");
-        $stmt->bindValue(':nom', $nominal_bayar, SQLITE3_INTEGER);
-        $stmt->bindValue(':tgl', date('Y-m-d'), SQLITE3_TEXT);
-        $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
+        $stmt->bindValue(':nom', $nominal_bayar, PDO::PARAM_INT);
+        $stmt->bindValue(':tgl', date('Y-m-d'), PDO::PARAM_STR);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
 
-        $tagihan = $db->querySingle("SELECT * FROM tagihan_operasional WHERE id = $id", true);
+        $tagihan = dbRow("SELECT * FROM tagihan_operasional WHERE id = $id");
         if ($tagihan) {
             $stmt = $db->prepare("INSERT INTO pengeluaran (properti_id, kategori, keterangan, nominal, tanggal, no_meter, id_pelanggan) VALUES (:prop, :kat, :ket, :nom, :tgl, :meter, :pelanggan)");
-            $stmt->bindValue(':prop', $tagihan['properti_id'], SQLITE3_INTEGER);
-            $stmt->bindValue(':kat', $tagihan['jenis'], SQLITE3_TEXT);
-            $stmt->bindValue(':ket', 'Bayar ' . $tagihan['jenis'] . ' periode ' . $tagihan['periode'] . ($tagihan['keterangan'] ? ' - ' . $tagihan['keterangan'] : ''), SQLITE3_TEXT);
-            $stmt->bindValue(':nom', $nominal_bayar, SQLITE3_INTEGER);
-            $stmt->bindValue(':tgl', date('Y-m-d'), SQLITE3_TEXT);
-            $stmt->bindValue(':meter', $tagihan['no_meter'], SQLITE3_TEXT);
-            $stmt->bindValue(':pelanggan', $tagihan['id_pelanggan'], SQLITE3_TEXT);
+            $stmt->bindValue(':prop', $tagihan['properti_id'], PDO::PARAM_INT);
+            $stmt->bindValue(':kat', $tagihan['jenis'], PDO::PARAM_STR);
+            $stmt->bindValue(':ket', 'Bayar ' . $tagihan['jenis'] . ' periode ' . $tagihan['periode'] . ($tagihan['keterangan'] ? ' - ' . $tagihan['keterangan'] : ''), PDO::PARAM_STR);
+            $stmt->bindValue(':nom', $nominal_bayar, PDO::PARAM_INT);
+            $stmt->bindValue(':tgl', date('Y-m-d'), PDO::PARAM_STR);
+            $stmt->bindValue(':meter', $tagihan['no_meter'], PDO::PARAM_STR);
+            $stmt->bindValue(':pelanggan', $tagihan['id_pelanggan'], PDO::PARAM_STR);
             $stmt->execute();
         }
 
@@ -59,36 +59,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $tipe_sewa = $_POST['tipe_sewa'] ?? 'Bulanan';
 
         $stmt = $db->prepare("INSERT INTO pemasukan (properti_id, penyewa_id, kamar_id, kategori, nominal, tanggal, periode_bulan, metode_bayar) VALUES (:prop, :penyewa, :kamar, 'Sewa', :nom, :tgl, :per, :metode)");
-        $stmt->bindValue(':prop', $properti_id, SQLITE3_INTEGER);
-        $stmt->bindValue(':penyewa', $penyewa_id, SQLITE3_INTEGER);
-        $stmt->bindValue(':kamar', $kamar_id, SQLITE3_INTEGER);
-        $stmt->bindValue(':nom', $nominal, SQLITE3_INTEGER);
-        $stmt->bindValue(':tgl', date('Y-m-d'), SQLITE3_TEXT);
-        $stmt->bindValue(':per', $periode, SQLITE3_TEXT);
-        $stmt->bindValue(':metode', $metode, SQLITE3_TEXT);
+        $stmt->bindValue(':prop', $properti_id, PDO::PARAM_INT);
+        $stmt->bindValue(':penyewa', $penyewa_id, PDO::PARAM_INT);
+        $stmt->bindValue(':kamar', $kamar_id, PDO::PARAM_INT);
+        $stmt->bindValue(':nom', $nominal, PDO::PARAM_INT);
+        $stmt->bindValue(':tgl', date('Y-m-d'), PDO::PARAM_STR);
+        $stmt->bindValue(':per', $periode, PDO::PARAM_STR);
+        $stmt->bindValue(':metode', $metode, PDO::PARAM_STR);
         $stmt->execute();
 
         // Jika tahunan, set bayar_sampai = 12 bulan dari sekarang
         if ($tipe_sewa === 'Tahunan') {
             $bayar_sampai = date('Y-m-d', strtotime('+12 months'));
             $stmt2 = $db->prepare("UPDATE penyewa SET bayar_sampai = :bs WHERE id = :id");
-            $stmt2->bindValue(':bs', $bayar_sampai, SQLITE3_TEXT);
-            $stmt2->bindValue(':id', $penyewa_id, SQLITE3_INTEGER);
+            $stmt2->bindValue(':bs', $bayar_sampai, PDO::PARAM_STR);
+            $stmt2->bindValue(':id', $penyewa_id, PDO::PARAM_INT);
             $stmt2->execute();
         }
 
         // Jika harian, update bayar_sampai ke tanggal_keluar (lunas)
         if ($tipe_sewa === 'Harian') {
-            $tgl_keluar = $db->querySingle("SELECT tanggal_keluar FROM penyewa WHERE id = $penyewa_id");
+            $tgl_keluar = dbValue("SELECT tanggal_keluar FROM penyewa WHERE id = $penyewa_id");
             if ($tgl_keluar) {
                 $stmt3 = $db->prepare("UPDATE penyewa SET bayar_sampai = :bs WHERE id = :id");
-                $stmt3->bindValue(':bs', $tgl_keluar, SQLITE3_TEXT);
-                $stmt3->bindValue(':id', $penyewa_id, SQLITE3_INTEGER);
+                $stmt3->bindValue(':bs', $tgl_keluar, PDO::PARAM_STR);
+                $stmt3->bindValue(':id', $penyewa_id, PDO::PARAM_INT);
                 $stmt3->execute();
             }
             // Auto-checkout jika dicentang
             if (isset($_POST['auto_checkout'])) {
-                $kamar_checkout = $db->querySingle("SELECT kamar_id FROM penyewa WHERE id = $penyewa_id");
+                $kamar_checkout = dbValue("SELECT kamar_id FROM penyewa WHERE id = $penyewa_id");
                 $db->exec("UPDATE penyewa SET status = 'Nonaktif' WHERE id = $penyewa_id");
                 if ($kamar_checkout) {
                     $db->exec("UPDATE kamar SET status = 'Kosong' WHERE id = $kamar_checkout");
@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        $last_id = $db->lastInsertRowID();
+        $last_id = $db->lastInsertId();
         $prop = $_POST['filter_properti'] ?? '';
         header('Location: index.php?pesan=sewa_dibayar&cetak=' . $last_id . ($prop ? "&properti=$prop" : ''));
         exit;
@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Checkout harian (sudah lunas, checkout saja)
     if ($action === 'checkout_harian') {
         $penyewa_id = (int)$_POST['penyewa_id'];
-        $kamar_id = $db->querySingle("SELECT kamar_id FROM penyewa WHERE id = $penyewa_id");
+        $kamar_id = dbValue("SELECT kamar_id FROM penyewa WHERE id = $penyewa_id");
         $db->exec("UPDATE penyewa SET status = 'Nonaktif' WHERE id = $penyewa_id");
         if ($kamar_id) {
             $db->exec("UPDATE kamar SET status = 'Kosong' WHERE id = $kamar_id");
@@ -120,8 +120,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)$_POST['id'];
         $nominal = (int)str_replace('.', '', $_POST['nominal'] ?? '0');
         $stmt = $db->prepare("UPDATE tagihan_operasional SET nominal = :nom WHERE id = :id");
-        $stmt->bindValue(':nom', $nominal, SQLITE3_INTEGER);
-        $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
+        $stmt->bindValue(':nom', $nominal, PDO::PARAM_INT);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
 
         $prop = $_POST['filter_properti'] ?? '';
@@ -141,14 +141,14 @@ $where_prop_k = $filter_properti ? "AND k.properti_id = $filter_properti" : "";
 $where_prop = $filter_properti ? "AND properti_id = $filter_properti" : "";
 
 // --- Statistik ---
-$total_kamar = $db->querySingle("SELECT COUNT(*) FROM kamar k WHERE 1=1 $where_prop_k");
-$kamar_terisi = $db->querySingle("SELECT COUNT(*) FROM kamar k WHERE status = 'Terisi' $where_prop_k");
-$kamar_kosong = $db->querySingle("SELECT COUNT(*) FROM kamar k WHERE status = 'Kosong' $where_prop_k");
+$total_kamar = dbValue("SELECT COUNT(*) FROM kamar k WHERE 1=1 $where_prop_k");
+$kamar_terisi = dbValue("SELECT COUNT(*) FROM kamar k WHERE status = 'Terisi' $where_prop_k");
+$kamar_kosong = dbValue("SELECT COUNT(*) FROM kamar k WHERE status = 'Kosong' $where_prop_k");
 
 $where_prop_pm = $filter_properti ? "AND properti_id = $filter_properti" : "";
-$pemasukan_bulan = $db->querySingle("SELECT COALESCE(SUM(nominal),0) FROM pemasukan WHERE strftime('%Y-%m', tanggal) = '$bulan_ini' $where_prop_pm");
-$pengeluaran_bulan = $db->querySingle("SELECT COALESCE(SUM(nominal),0) FROM pengeluaran WHERE strftime('%Y-%m', tanggal) = '$bulan_ini' $where_prop");
-$maintenance_bulan = $db->querySingle("SELECT COALESCE(SUM(biaya),0) FROM maintenance WHERE strftime('%Y-%m', tanggal) = '$bulan_ini' $where_prop");
+$pemasukan_bulan = dbValue("SELECT COALESCE(SUM(nominal),0) FROM pemasukan WHERE " . sqlYearMonth('tanggal') . " = '$bulan_ini' $where_prop_pm");
+$pengeluaran_bulan = dbValue("SELECT COALESCE(SUM(nominal),0) FROM pengeluaran WHERE " . sqlYearMonth('tanggal') . " = '$bulan_ini' $where_prop");
+$maintenance_bulan = dbValue("SELECT COALESCE(SUM(biaya),0) FROM maintenance WHERE " . sqlYearMonth('tanggal') . " = '$bulan_ini' $where_prop");
 $total_pengeluaran = $pengeluaran_bulan + $maintenance_bulan;
 $laba_bulan = $pemasukan_bulan - $total_pengeluaran;
 
@@ -168,7 +168,7 @@ $info_tahunan = [];
 $alert_harian_checkout = []; // Penyewa harian sudah lunas, mendekati/hari ini checkout
 $alert_harian_nunggak = [];  // Penyewa harian perpanjang tapi ada malam belum dibayar
 $alert_harian_lewat = [];    // Penyewa harian lewat batas checkout
-while ($row = $penyewa_aktif->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $penyewa_aktif->fetch()) {
     // === Penyewa HARIAN ===
     if ($row['tipe_sewa'] === 'Harian' && $row['tanggal_keluar']) {
         $harga_malam = $row['harga_sewa'] ?: 0;
@@ -177,7 +177,7 @@ while ($row = $penyewa_aktif->fetchArray(SQLITE3_ASSOC)) {
         $total_tagihan = $total_malam * $harga_malam;
 
         // Hitung total yang sudah dibayar dari tabel pemasukan
-        $total_dibayar = $db->querySingle("SELECT COALESCE(SUM(nominal),0) FROM pemasukan WHERE penyewa_id = {$row['id']} AND kategori = 'Sewa'");
+        $total_dibayar = dbValue("SELECT COALESCE(SUM(nominal),0) FROM pemasukan WHERE penyewa_id = {$row['id']} AND kategori = 'Sewa'");
         $sisa_tagihan = $total_tagihan - $total_dibayar;
         $malam_belum_bayar = ($harga_malam > 0) ? max(0, (int)ceil($sisa_tagihan / $harga_malam)) : 0;
 
@@ -224,7 +224,7 @@ while ($row = $penyewa_aktif->fetchArray(SQLITE3_ASSOC)) {
     $jt = $bulan_jt . '-' . str_pad($jt_tanggal, 2, '0', STR_PAD_LEFT);
 
     if ($jt < $today) {
-        $sudah_bayar = $db->querySingle("SELECT COUNT(*) FROM pemasukan WHERE penyewa_id = {$row['id']} AND kategori = 'Sewa' AND periode_bulan = '$bulan_jt'");
+        $sudah_bayar = dbValue("SELECT COUNT(*) FROM pemasukan WHERE penyewa_id = {$row['id']} AND kategori = 'Sewa' AND periode_bulan = '$bulan_jt'");
         if (!$sudah_bayar) {
             $selisih = (strtotime($today) - strtotime($jt)) / 86400;
             $row['jatuh_tempo'] = $jt;
@@ -235,7 +235,7 @@ while ($row = $penyewa_aktif->fetchArray(SQLITE3_ASSOC)) {
     } else {
         $selisih = (strtotime($jt) - strtotime($today)) / 86400;
         if ($selisih <= 3) {
-            $sudah_bayar = $db->querySingle("SELECT COUNT(*) FROM pemasukan WHERE penyewa_id = {$row['id']} AND kategori = 'Sewa' AND periode_bulan = '$bulan_jt'");
+            $sudah_bayar = dbValue("SELECT COUNT(*) FROM pemasukan WHERE penyewa_id = {$row['id']} AND kategori = 'Sewa' AND periode_bulan = '$bulan_jt'");
             if (!$sudah_bayar) {
                 $row['jatuh_tempo'] = $jt;
                 $row['selisih_hari'] = (int)$selisih;
@@ -259,7 +259,7 @@ $tagihan_ops = $db->query("
 ");
 $alert_ops_terlambat = [];
 $alert_ops_mendekati = [];
-while ($row = $tagihan_ops->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $tagihan_ops->fetch()) {
     $selisih = (strtotime($row['jatuh_tempo']) - strtotime($today)) / 86400;
     $row['selisih_hari'] = (int)$selisih;
     if ($selisih < 0) {
@@ -912,7 +912,7 @@ if ($ada_alert):
                             ORDER BY m.tanggal DESC LIMIT 5
                         ");
                         $ada_mt = false;
-                        while ($row = $mt->fetchArray(SQLITE3_ASSOC)):
+                        while ($row = $mt->fetch()):
                             $ada_mt = true;
                         ?>
                         <tr>

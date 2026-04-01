@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Auto-fill properti dari kamar
         if ($kamar_id && !$properti_id) {
-            $properti_id = $db->querySingle("SELECT properti_id FROM kamar WHERE id = $kamar_id");
+            $properti_id = dbValue("SELECT properti_id FROM kamar WHERE id = $kamar_id");
         }
 
         if ($action === 'tambah') {
@@ -30,16 +30,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $id = (int)$_POST['id'];
             $stmt = $db->prepare("UPDATE maintenance SET properti_id = :prop, kamar_id = :kamar, tipe = :tipe, judul = :judul, keterangan = :ket, biaya = :biaya, tanggal = :tgl, status = :status WHERE id = :id");
-            $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         }
-        $stmt->bindValue(':prop', $properti_id, SQLITE3_INTEGER);
-        $stmt->bindValue(':kamar', $kamar_id, SQLITE3_INTEGER);
-        $stmt->bindValue(':tipe', $tipe, SQLITE3_TEXT);
-        $stmt->bindValue(':judul', $judul, SQLITE3_TEXT);
-        $stmt->bindValue(':ket', $keterangan, SQLITE3_TEXT);
-        $stmt->bindValue(':biaya', $biaya, SQLITE3_INTEGER);
-        $stmt->bindValue(':tgl', $tanggal, SQLITE3_TEXT);
-        $stmt->bindValue(':status', $status_mt, SQLITE3_TEXT);
+        $stmt->bindValue(':prop', $properti_id, PDO::PARAM_INT);
+        $stmt->bindValue(':kamar', $kamar_id, PDO::PARAM_INT);
+        $stmt->bindValue(':tipe', $tipe, PDO::PARAM_STR);
+        $stmt->bindValue(':judul', $judul, PDO::PARAM_STR);
+        $stmt->bindValue(':ket', $keterangan, PDO::PARAM_STR);
+        $stmt->bindValue(':biaya', $biaya, PDO::PARAM_INT);
+        $stmt->bindValue(':tgl', $tanggal, PDO::PARAM_STR);
+        $stmt->bindValue(':status', $status_mt, PDO::PARAM_STR);
         $stmt->execute();
 
         header('Location: maintenance.php?pesan=sukses&tahun=' . $filter_tahun . ($filter_properti ? "&properti=$filter_properti" : ''));
@@ -58,9 +58,9 @@ $edit_data = null;
 if (isset($_GET['edit'])) {
     $edit_id = (int)$_GET['edit'];
     $stmt = $db->prepare("SELECT * FROM maintenance WHERE id = :id");
-    $stmt->bindValue(':id', $edit_id, SQLITE3_INTEGER);
-    $result = $stmt->execute();
-    $edit_data = $result->fetchArray(SQLITE3_ASSOC);
+    $stmt->bindValue(':id', $edit_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $edit_data = $stmt->fetch();
 }
 
 // Kamar grouped by properti
@@ -71,7 +71,7 @@ $kamar_all = $db->query("
     ORDER BY pr.nama, k.nomor_kamar
 ");
 $kamar_options = [];
-while ($row = $kamar_all->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $kamar_all->fetch()) {
     $kamar_options[] = $row;
 }
 
@@ -202,14 +202,14 @@ require_once __DIR__ . '/../includes/header.php';
                     COALESCE(SUM(m.biaya), 0) as total_biaya
                 FROM kamar k
                 JOIN properti pr ON k.properti_id = pr.id
-                LEFT JOIN maintenance m ON m.kamar_id = k.id AND m.tipe = 'Spesifik' AND strftime('%Y', m.tanggal) = '$filter_tahun'
+                LEFT JOIN maintenance m ON m.kamar_id = k.id AND m.tipe = 'Spesifik' AND " . sqlYear('m.tanggal') . " = '$filter_tahun'
                 WHERE 1=1 $where_prop_mt
                 GROUP BY k.id
                 ORDER BY total_biaya DESC
             ");
             $where_prop_umum = $filter_properti ? "AND properti_id = $filter_properti" : "";
-            $total_mt_umum = $db->querySingle("SELECT COALESCE(SUM(biaya), 0) FROM maintenance WHERE tipe = 'Umum' AND strftime('%Y', tanggal) = '$filter_tahun' $where_prop_umum");
-            $count_mt_umum = $db->querySingle("SELECT COUNT(*) FROM maintenance WHERE tipe = 'Umum' AND strftime('%Y', tanggal) = '$filter_tahun' $where_prop_umum");
+            $total_mt_umum = dbValue("SELECT COALESCE(SUM(biaya), 0) FROM maintenance WHERE tipe = 'Umum' AND " . sqlYear('tanggal') . " = '$filter_tahun' $where_prop_umum");
+            $count_mt_umum = dbValue("SELECT COUNT(*) FROM maintenance WHERE tipe = 'Umum' AND " . sqlYear('tanggal') . " = '$filter_tahun' $where_prop_umum");
             ?>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
@@ -223,7 +223,7 @@ require_once __DIR__ . '/../includes/header.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($row = $rekap->fetchArray(SQLITE3_ASSOC)): ?>
+                        <?php while ($row = $rekap->fetch()): ?>
                         <tr>
                             <?php if (!$filter_properti): ?>
                             <td><small class="text-muted"><?= htmlspecialchars($row['nama_properti']) ?></small></td>
@@ -281,11 +281,11 @@ require_once __DIR__ . '/../includes/header.php';
                             FROM maintenance m
                             LEFT JOIN kamar k ON m.kamar_id = k.id
                             LEFT JOIN properti pr ON m.properti_id = pr.id
-                            WHERE strftime('%Y', m.tanggal) = '$filter_tahun' $where_detail
+                            WHERE " . sqlYear('m.tanggal') . " = '$filter_tahun' $where_detail
                             ORDER BY m.tanggal DESC
                         ");
                         $ada = false;
-                        while ($row = $data->fetchArray(SQLITE3_ASSOC)):
+                        while ($row = $data->fetch()):
                             $ada = true;
                             $status_class = match($row['status']) {
                                 'Selesai' => 'bg-success',

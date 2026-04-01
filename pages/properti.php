@@ -17,12 +17,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $id = (int)$_POST['id'];
             $stmt = $db->prepare("UPDATE properti SET nama = :nama, alamat = :alamat, tipe = :tipe, catatan = :catatan WHERE id = :id");
-            $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         }
-        $stmt->bindValue(':nama', $nama, SQLITE3_TEXT);
-        $stmt->bindValue(':alamat', $alamat, SQLITE3_TEXT);
-        $stmt->bindValue(':tipe', $tipe, SQLITE3_TEXT);
-        $stmt->bindValue(':catatan', $catatan, SQLITE3_TEXT);
+        $stmt->bindValue(':nama', $nama, PDO::PARAM_STR);
+        $stmt->bindValue(':alamat', $alamat, PDO::PARAM_STR);
+        $stmt->bindValue(':tipe', $tipe, PDO::PARAM_STR);
+        $stmt->bindValue(':catatan', $catatan, PDO::PARAM_STR);
         $stmt->execute();
 
         header('Location: properti.php?pesan=sukses');
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'hapus') {
         $id = (int)$_POST['id'];
         // Cek apakah ada kamar di properti ini
-        $jml_kamar = $db->querySingle("SELECT COUNT(*) FROM kamar WHERE properti_id = $id");
+        $jml_kamar = dbValue("SELECT COUNT(*) FROM kamar WHERE properti_id = $id");
         if ($jml_kamar > 0) {
             header('Location: properti.php?pesan=gagal_hapus');
             exit;
@@ -47,9 +47,9 @@ $edit_data = null;
 if (isset($_GET['edit'])) {
     $edit_id = (int)$_GET['edit'];
     $stmt = $db->prepare("SELECT * FROM properti WHERE id = :id");
-    $stmt->bindValue(':id', $edit_id, SQLITE3_INTEGER);
-    $result = $stmt->execute();
-    $edit_data = $result->fetchArray(SQLITE3_ASSOC);
+    $stmt->bindValue(':id', $edit_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $edit_data = $stmt->fetch();
 }
 
 require_once __DIR__ . '/../includes/header.php';
@@ -116,13 +116,13 @@ require_once __DIR__ . '/../includes/header.php';
             <?php
             $properti_list = $db->query("SELECT * FROM properti ORDER BY nama");
             $ada = false;
-            while ($row = $properti_list->fetchArray(SQLITE3_ASSOC)):
+            while ($row = $properti_list->fetch()):
                 $ada = true;
-                $jml_kamar = $db->querySingle("SELECT COUNT(*) FROM kamar WHERE properti_id = {$row['id']}");
-                $jml_terisi = $db->querySingle("SELECT COUNT(*) FROM kamar WHERE properti_id = {$row['id']} AND status = 'Terisi'");
-                $jml_kosong = $db->querySingle("SELECT COUNT(*) FROM kamar WHERE properti_id = {$row['id']} AND status = 'Kosong'");
-                $jml_mt = $db->querySingle("SELECT COUNT(*) FROM kamar WHERE properti_id = {$row['id']} AND status = 'Maintenance'");
-                $pemasukan = $db->querySingle("SELECT COALESCE(SUM(nominal),0) FROM pemasukan WHERE properti_id = {$row['id']} AND strftime('%Y-%m', tanggal) = '" . date('Y-m') . "'");
+                $jml_kamar = dbValue("SELECT COUNT(*) FROM kamar WHERE properti_id = {$row['id']}");
+                $jml_terisi = dbValue("SELECT COUNT(*) FROM kamar WHERE properti_id = {$row['id']} AND status = 'Terisi'");
+                $jml_kosong = dbValue("SELECT COUNT(*) FROM kamar WHERE properti_id = {$row['id']} AND status = 'Kosong'");
+                $jml_mt = dbValue("SELECT COUNT(*) FROM kamar WHERE properti_id = {$row['id']} AND status = 'Maintenance'");
+                $pemasukan = dbValue("SELECT COALESCE(SUM(nominal),0) FROM pemasukan WHERE properti_id = {$row['id']} AND " . sqlYearMonth('tanggal') . " = '" . date('Y-m') . "'");
             ?>
             <div class="col-md-6">
                 <div class="card stat-card h-100">

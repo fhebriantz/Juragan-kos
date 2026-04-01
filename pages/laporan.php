@@ -18,9 +18,9 @@ $bulan_nama = [
 $where_prop = $filter_properti ? "AND properti_id = $filter_properti" : "";
 
 // === Cari semua kategori pengeluaran yang ada di tahun ini ===
-$kat_result = $db->query("SELECT DISTINCT kategori FROM pengeluaran WHERE strftime('%Y', tanggal) = '$filter_tahun' $where_prop ORDER BY kategori");
+$kat_result = $db->query("SELECT DISTINCT kategori FROM pengeluaran WHERE " . sqlYear('tanggal') . " = '$filter_tahun' $where_prop ORDER BY kategori");
 $kategori_pengeluaran = [];
-while ($row = $kat_result->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $kat_result->fetch()) {
     $kategori_pengeluaran[] = $row['kategori'];
 }
 // Pastikan minimal ada kolom walaupun kosong
@@ -42,23 +42,23 @@ for ($m = 1; $m <= 12; $m++) {
     $bln = $filter_tahun . '-' . str_pad($m, 2, '0', STR_PAD_LEFT);
 
     // Pemasukan
-    $pemasukan_sewa = $db->querySingle("SELECT COALESCE(SUM(nominal),0) FROM pemasukan WHERE strftime('%Y-%m', tanggal) = '$bln' AND kategori = 'Sewa' $where_prop");
-    $pemasukan_lain = $db->querySingle("SELECT COALESCE(SUM(nominal),0) FROM pemasukan WHERE strftime('%Y-%m', tanggal) = '$bln' AND kategori != 'Sewa' $where_prop");
+    $pemasukan_sewa = dbValue("SELECT COALESCE(SUM(nominal),0) FROM pemasukan WHERE " . sqlYearMonth('tanggal') . " = '$bln' AND kategori = 'Sewa' $where_prop");
+    $pemasukan_lain = dbValue("SELECT COALESCE(SUM(nominal),0) FROM pemasukan WHERE " . sqlYearMonth('tanggal') . " = '$bln' AND kategori != 'Sewa' $where_prop");
     $total_masuk = $pemasukan_sewa + $pemasukan_lain;
 
     // Pengeluaran per kategori (dinamis)
     $pengeluaran_detail = [];
     $total_pengeluaran_bulan = 0;
     foreach ($kategori_pengeluaran as $kat) {
-        $kat_escaped = SQLite3::escapeString($kat);
-        $nom = $db->querySingle("SELECT COALESCE(SUM(nominal),0) FROM pengeluaran WHERE strftime('%Y-%m', tanggal) = '$bln' AND kategori = '$kat_escaped' $where_prop");
+        $kat_escaped = dbEscape($kat);
+        $nom = dbValue("SELECT COALESCE(SUM(nominal),0) FROM pengeluaran WHERE " . sqlYearMonth('tanggal') . " = '$bln' AND kategori = '$kat_escaped' $where_prop");
         $pengeluaran_detail[$kat] = $nom;
         $total_pengeluaran_bulan += $nom;
         $total_per_kategori[$kat] += $nom;
     }
 
     // Maintenance (terpisah dari tabel pengeluaran)
-    $maintenance = $db->querySingle("SELECT COALESCE(SUM(biaya),0) FROM maintenance WHERE strftime('%Y-%m', tanggal) = '$bln' $where_prop");
+    $maintenance = dbValue("SELECT COALESCE(SUM(biaya),0) FROM maintenance WHERE " . sqlYearMonth('tanggal') . " = '$bln' $where_prop");
 
     $total_keluar = $total_pengeluaran_bulan + $maintenance;
     $laba = $total_masuk - $total_keluar;

@@ -1,0 +1,16 @@
+<?php
+// ===== KONFIGURASI MYSQL =====
+// Copy file ini menjadi mysql.php dan isi dengan kredensial MySQL Anda.
+// Jika file mysql.php ada, aplikasi otomatis menggunakan MySQL.
+// Jika tidak ada, aplikasi tetap menggunakan SQLite (mode desktop).
+
+// InfinityFree:
+// - Host: sql###.infinityfree.com (lihat di control panel)
+// - Database: epiz_XXXXX_juragan_kos (buat di MySQL Databases)
+// - Username: epiz_XXXXX (lihat di control panel)
+// - Password: (password yang Anda set)
+
+$mysql_host = 'localhost';
+$mysql_db   = 'juragan_kos';
+$mysql_user = 'root';
+$mysql_pass = '';

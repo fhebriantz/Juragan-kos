@@ -13,10 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fields = ['nama_usaha', 'no_hp_pemilik', 'nama_pemilik', 'warna_sidebar', 'mode_font_sidebar'];
         foreach ($fields as $field) {
             $value = trim($_POST[$field] ?? '');
-            $stmt = $db->prepare("INSERT OR REPLACE INTO pengaturan (id, kunci, nilai) VALUES ((SELECT id FROM pengaturan WHERE kunci = :k), :k, :v)");
-            $stmt->bindValue(':k', $field, SQLITE3_TEXT);
-            $stmt->bindValue(':v', $value, SQLITE3_TEXT);
-            $stmt->execute();
+            upsertPengaturan($db, $field, $value);
         }
 
         // Upload logo
@@ -39,9 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 if (move_uploaded_file($_FILES['logo']['tmp_name'], $dest)) {
-                    $stmt = $db->prepare("INSERT OR REPLACE INTO pengaturan (id, kunci, nilai) VALUES ((SELECT id FROM pengaturan WHERE kunci = 'logo'), 'logo', :v)");
-                    $stmt->bindValue(':v', $filename, SQLITE3_TEXT);
-                    $stmt->execute();
+                    upsertPengaturan($db, 'logo', $filename);
                 }
             }
         }
@@ -61,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'isi_demo') {
-        $ada_data = $db->querySingle("SELECT COUNT(*) FROM properti");
+        $ada_data = dbValue("SELECT COUNT(*) FROM properti");
         if ($ada_data > 0) {
             $pesan = 'Database masih berisi data. Reset seluruh database terlebih dahulu sebelum mengisi data demo.';
             $pesan_type = 'danger';
@@ -87,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $db->exec("DELETE FROM maintenance");
             $db->exec("DELETE FROM tagihan_operasional");
             // Reset auto-increment
-            $db->exec("DELETE FROM sqlite_sequence WHERE name IN ('pemasukan','pengeluaran','maintenance','tagihan_operasional')");
+            resetAutoIncrement($db, ['pemasukan','pengeluaran','maintenance','tagihan_operasional']);
             header('Location: pengaturan.php?pesan=reset_transaksi');
             exit;
         }
@@ -107,10 +102,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $db->exec("DELETE FROM kamar");
             $db->exec("DELETE FROM properti");
             // Reset semua auto-increment kecuali pengaturan
-            $db->exec("DELETE FROM sqlite_sequence WHERE name != 'pengaturan'");
+            resetAutoIncrement($db, ['pemasukan','pengeluaran','maintenance','tagihan_operasional','template_tagihan','penyewa','kamar','properti']);
             // Hapus flag demo & tandai sudah pernah reset
             $db->exec("DELETE FROM pengaturan WHERE kunci = 'is_demo'");
-            $db->exec("INSERT OR REPLACE INTO pengaturan (id, kunci, nilai) VALUES ((SELECT id FROM pengaturan WHERE kunci = 'sudah_reset'), 'sudah_reset', '1')");
+            upsertPengaturan($db, 'sudah_reset', '1');
             header('Location: pengaturan.php?pesan=reset_database');
             exit;
         }
@@ -269,13 +264,13 @@ require_once __DIR__ . '/../includes/header.php';
                 </tr>
                 <tr>
                     <td class="text-muted">Teknologi</td>
-                    <td>PHP, SQLite, Bootstrap 5</td>
+                    <td>PHP, SQLite/MySQL, Bootstrap 5</td>
                 </tr>
             </table>
         </div>
 
         <!-- Isi Data Demo -->
-        <?php $db_kosong = $db->querySingle("SELECT COUNT(*) FROM properti") == 0; ?>
+        <?php $db_kosong = dbValue("SELECT COUNT(*) FROM properti") == 0; ?>
         <div class="form-wrapper mb-4 border border-info">
             <h6 class="fw-bold mb-1 text-info"><i class="bi bi-box-seam me-2"></i>Isi Data Demo</h6>
             <p class="text-muted small mb-3">
@@ -304,10 +299,10 @@ require_once __DIR__ . '/../includes/header.php';
             <p class="text-muted small mb-3">Menghapus semua data: <strong>Pemasukan, Pengeluaran, Maintenance, dan Tagihan Operasional</strong>. Data Properti, Kamar, dan Penyewa tetap aman.</p>
 
             <?php
-            $jml_pemasukan = $db->querySingle("SELECT COUNT(*) FROM pemasukan");
-            $jml_pengeluaran = $db->querySingle("SELECT COUNT(*) FROM pengeluaran");
-            $jml_maintenance = $db->querySingle("SELECT COUNT(*) FROM maintenance");
-            $jml_tagihan = $db->querySingle("SELECT COUNT(*) FROM tagihan_operasional");
+            $jml_pemasukan = dbValue("SELECT COUNT(*) FROM pemasukan");
+            $jml_pengeluaran = dbValue("SELECT COUNT(*) FROM pengeluaran");
+            $jml_maintenance = dbValue("SELECT COUNT(*) FROM maintenance");
+            $jml_tagihan = dbValue("SELECT COUNT(*) FROM tagihan_operasional");
             ?>
             <div class="row g-2 mb-3">
                 <div class="col-6"><span class="badge bg-light text-dark w-100 py-2"><?= $jml_pemasukan ?> Pemasukan</span></div>
@@ -334,9 +329,9 @@ require_once __DIR__ . '/../includes/header.php';
             <p class="text-muted small mb-3">Menghapus <strong>SEMUA data</strong> termasuk Properti, Kamar, Penyewa, dan seluruh transaksi. Hanya Pengaturan Umum yang dipertahankan. <strong class="text-danger">Tidak bisa dibatalkan!</strong></p>
 
             <?php
-            $jml_properti = $db->querySingle("SELECT COUNT(*) FROM properti");
-            $jml_kamar = $db->querySingle("SELECT COUNT(*) FROM kamar");
-            $jml_penyewa = $db->querySingle("SELECT COUNT(*) FROM penyewa");
+            $jml_properti = dbValue("SELECT COUNT(*) FROM properti");
+            $jml_kamar = dbValue("SELECT COUNT(*) FROM kamar");
+            $jml_penyewa = dbValue("SELECT COUNT(*) FROM penyewa");
             $total_data = $jml_properti + $jml_kamar + $jml_penyewa + $jml_pemasukan + $jml_pengeluaran + $jml_maintenance + $jml_tagihan;
             ?>
             <div class="alert alert-danger py-2 mb-3 small">

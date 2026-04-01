@@ -23,18 +23,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($jatuh_tempo_tanggal > 28) $jatuh_tempo_tanggal = 28;
 
         if ($action === 'tambah_template') {
-            $stmt = $db->prepare("INSERT OR IGNORE INTO template_tagihan (properti_id, jenis, keterangan, nominal_default, isi_manual, jatuh_tempo_tanggal) VALUES (:prop, :jenis, :ket, :nom, :manual, :jt)");
+            $stmt = $db->prepare(sqlInsertIgnore() . " template_tagihan (properti_id, jenis, keterangan, nominal_default, isi_manual, jatuh_tempo_tanggal) VALUES (:prop, :jenis, :ket, :nom, :manual, :jt)");
         } else {
             $id = (int)$_POST['id'];
             $stmt = $db->prepare("UPDATE template_tagihan SET properti_id = :prop, jenis = :jenis, keterangan = :ket, nominal_default = :nom, isi_manual = :manual, jatuh_tempo_tanggal = :jt WHERE id = :id");
-            $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         }
-        $stmt->bindValue(':prop', $properti_id, SQLITE3_INTEGER);
-        $stmt->bindValue(':jenis', $jenis, SQLITE3_TEXT);
-        $stmt->bindValue(':ket', $keterangan, SQLITE3_TEXT);
-        $stmt->bindValue(':nom', $nominal_default, SQLITE3_INTEGER);
-        $stmt->bindValue(':manual', $isi_manual, SQLITE3_INTEGER);
-        $stmt->bindValue(':jt', $jatuh_tempo_tanggal, SQLITE3_INTEGER);
+        $stmt->bindValue(':prop', $properti_id, PDO::PARAM_INT);
+        $stmt->bindValue(':jenis', $jenis, PDO::PARAM_STR);
+        $stmt->bindValue(':ket', $keterangan, PDO::PARAM_STR);
+        $stmt->bindValue(':nom', $nominal_default, PDO::PARAM_INT);
+        $stmt->bindValue(':manual', $isi_manual, PDO::PARAM_INT);
+        $stmt->bindValue(':jt', $jatuh_tempo_tanggal, PDO::PARAM_INT);
         $stmt->execute();
 
         generateTagihanBulanan($db);
@@ -65,11 +65,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $keterangan = trim($_POST['keterangan'] ?? '');
 
         $stmt = $db->prepare("INSERT INTO tagihan_operasional (properti_id, jenis, nominal, periode, jatuh_tempo, keterangan, tipe, status) VALUES (:prop, :jenis, :nom, '', :jt, :ket, 'Sekali Bayar', 'Belum Bayar')");
-        $stmt->bindValue(':prop', $properti_id, SQLITE3_INTEGER);
-        $stmt->bindValue(':jenis', $jenis, SQLITE3_TEXT);
-        $stmt->bindValue(':nom', $nominal, SQLITE3_INTEGER);
-        $stmt->bindValue(':jt', $jatuh_tempo, SQLITE3_TEXT);
-        $stmt->bindValue(':ket', $keterangan, SQLITE3_TEXT);
+        $stmt->bindValue(':prop', $properti_id, PDO::PARAM_INT);
+        $stmt->bindValue(':jenis', $jenis, PDO::PARAM_STR);
+        $stmt->bindValue(':nom', $nominal, PDO::PARAM_INT);
+        $stmt->bindValue(':jt', $jatuh_tempo, PDO::PARAM_STR);
+        $stmt->bindValue(':ket', $keterangan, PDO::PARAM_STR);
         $stmt->execute();
 
         header('Location: tagihan_operasional.php?pesan=manual_ok' . ($filter_properti ? "&properti=$filter_properti" : ''));
@@ -82,9 +82,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nominal = (int)str_replace('.', '', $_POST['nominal'] ?? '0');
         $keterangan = trim($_POST['keterangan'] ?? '');
         $stmt = $db->prepare("UPDATE tagihan_operasional SET nominal = :nom, keterangan = :ket WHERE id = :id");
-        $stmt->bindValue(':nom', $nominal, SQLITE3_INTEGER);
-        $stmt->bindValue(':ket', $keterangan, SQLITE3_TEXT);
-        $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
+        $stmt->bindValue(':nom', $nominal, PDO::PARAM_INT);
+        $stmt->bindValue(':ket', $keterangan, PDO::PARAM_STR);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
         header('Location: tagihan_operasional.php?pesan=update_ok' . ($filter_properti ? "&properti=$filter_properti" : ''));
         exit;
@@ -94,17 +94,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)$_POST['id'];
         $db->exec("UPDATE tagihan_operasional SET status = 'Sudah Bayar', tanggal_bayar = '" . date('Y-m-d') . "' WHERE id = $id");
 
-        $tagihan = $db->querySingle("SELECT * FROM tagihan_operasional WHERE id = $id", true);
+        $tagihan = dbRow("SELECT * FROM tagihan_operasional WHERE id = $id");
         if ($tagihan) {
             $stmt = $db->prepare("INSERT INTO pengeluaran (properti_id, kategori, keterangan, nominal, tanggal) VALUES (:prop, :kat, :ket, :nom, :tgl)");
-            $stmt->bindValue(':prop', $tagihan['properti_id'], SQLITE3_INTEGER);
-            $stmt->bindValue(':kat', $tagihan['jenis'], SQLITE3_TEXT);
+            $stmt->bindValue(':prop', $tagihan['properti_id'], PDO::PARAM_INT);
+            $stmt->bindValue(':kat', $tagihan['jenis'], PDO::PARAM_STR);
             $ket = 'Bayar ' . $tagihan['jenis'];
             if ($tagihan['periode']) $ket .= ' periode ' . $tagihan['periode'];
             if ($tagihan['keterangan']) $ket .= ' - ' . $tagihan['keterangan'];
-            $stmt->bindValue(':ket', $ket, SQLITE3_TEXT);
-            $stmt->bindValue(':nom', $tagihan['nominal'], SQLITE3_INTEGER);
-            $stmt->bindValue(':tgl', date('Y-m-d'), SQLITE3_TEXT);
+            $stmt->bindValue(':ket', $ket, PDO::PARAM_STR);
+            $stmt->bindValue(':nom', $tagihan['nominal'], PDO::PARAM_INT);
+            $stmt->bindValue(':tgl', date('Y-m-d'), PDO::PARAM_STR);
             $stmt->execute();
         }
 
@@ -134,8 +134,9 @@ $edit_template = null;
 if (isset($_GET['edit_template'])) {
     $et_id = (int)$_GET['edit_template'];
     $stmt = $db->prepare("SELECT * FROM template_tagihan WHERE id = :id");
-    $stmt->bindValue(':id', $et_id, SQLITE3_INTEGER);
-    $edit_template = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+    $stmt->bindValue(':id', $et_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $edit_template = $stmt->fetch();
     $tab = 'template';
 }
 
@@ -143,8 +144,9 @@ $edit_tagihan = null;
 if (isset($_GET['edit_tagihan'])) {
     $etg_id = (int)$_GET['edit_tagihan'];
     $stmt = $db->prepare("SELECT * FROM tagihan_operasional WHERE id = :id");
-    $stmt->bindValue(':id', $etg_id, SQLITE3_INTEGER);
-    $edit_tagihan = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+    $stmt->bindValue(':id', $etg_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $edit_tagihan = $stmt->fetch();
 }
 
 require_once __DIR__ . '/../includes/header.php';
@@ -280,7 +282,7 @@ require_once __DIR__ . '/../includes/header.php';
                             ORDER BY pr.nama, t.jenis
                         ");
                         $ada_tmpl = false;
-                        while ($row = $tmpl->fetchArray(SQLITE3_ASSOC)):
+                        while ($row = $tmpl->fetch()):
                             $ada_tmpl = true;
                         ?>
                         <tr class="<?= !$row['aktif'] ? 'table-secondary' : '' ?>">
@@ -461,7 +463,7 @@ toggleNominalTetap();
                 <?php
                 $where_parts = [];
                 if ($filter_properti) $where_parts[] = "t.properti_id = $filter_properti";
-                if ($filter_status) $where_parts[] = "t.status = '" . SQLite3::escapeString($filter_status) . "'";
+                if ($filter_status) $where_parts[] = "t.status = '" . dbEscape($filter_status) . "'";
                 $where = $where_parts ? "WHERE " . implode(" AND ", $where_parts) : "";
                 $data = $db->query("
                     SELECT t.*, pr.nama as nama_properti
@@ -472,7 +474,7 @@ toggleNominalTetap();
                 ");
                 $ada = false;
                 $today = date('Y-m-d');
-                while ($row = $data->fetchArray(SQLITE3_ASSOC)):
+                while ($row = $data->fetch()):
                     $ada = true;
                     $terlambat = ($row['status'] === 'Belum Bayar' && $row['jatuh_tempo'] < $today);
                 ?>

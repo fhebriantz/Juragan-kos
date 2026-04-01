@@ -23,15 +23,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $id = (int)$_POST['id'];
             $stmt = $db->prepare("UPDATE kamar SET properti_id = :prop, nomor_kamar = :nomor, fasilitas = :fasilitas, harga_bulanan = :hb, harga_tahunan = :ht, status = :status, catatan = :catatan WHERE id = :id");
-            $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         }
-        $stmt->bindValue(':prop', $properti_id, SQLITE3_INTEGER);
-        $stmt->bindValue(':nomor', $nomor_kamar, SQLITE3_TEXT);
-        $stmt->bindValue(':fasilitas', $fasilitas, SQLITE3_TEXT);
-        $stmt->bindValue(':hb', $harga_bulanan, SQLITE3_INTEGER);
-        $stmt->bindValue(':ht', $harga_tahunan, SQLITE3_INTEGER);
-        $stmt->bindValue(':status', $status, SQLITE3_TEXT);
-        $stmt->bindValue(':catatan', $catatan, SQLITE3_TEXT);
+        $stmt->bindValue(':prop', $properti_id, PDO::PARAM_INT);
+        $stmt->bindValue(':nomor', $nomor_kamar, PDO::PARAM_STR);
+        $stmt->bindValue(':fasilitas', $fasilitas, PDO::PARAM_STR);
+        $stmt->bindValue(':hb', $harga_bulanan, PDO::PARAM_INT);
+        $stmt->bindValue(':ht', $harga_tahunan, PDO::PARAM_INT);
+        $stmt->bindValue(':status', $status, PDO::PARAM_STR);
+        $stmt->bindValue(':catatan', $catatan, PDO::PARAM_STR);
         $stmt->execute();
 
         $redir = $filter_properti ? "kamar.php?properti=$filter_properti&pesan=sukses" : "kamar.php?pesan=sukses";
@@ -52,9 +52,9 @@ $edit_data = null;
 if (isset($_GET['edit'])) {
     $edit_id = (int)$_GET['edit'];
     $stmt = $db->prepare("SELECT * FROM kamar WHERE id = :id");
-    $stmt->bindValue(':id', $edit_id, SQLITE3_INTEGER);
-    $result = $stmt->execute();
-    $edit_data = $result->fetchArray(SQLITE3_ASSOC);
+    $stmt->bindValue(':id', $edit_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $edit_data = $stmt->fetch();
     if ($edit_data && !$filter_properti) {
         $filter_properti = $edit_data['properti_id'];
     }
@@ -180,7 +180,7 @@ require_once __DIR__ . '/../includes/header.php';
                             ORDER BY pr.nama, k.nomor_kamar ASC
                         ");
                         $ada = false;
-                        while ($row = $kamar_list->fetchArray(SQLITE3_ASSOC)):
+                        while ($row = $kamar_list->fetch()):
                             $ada = true;
                             $status_class = match($row['status']) {
                                 'Terisi' => 'bg-success',

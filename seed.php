@@ -18,7 +18,7 @@
 require_once __DIR__ . '/config/database.php';
 
 // Cek apakah sudah ada data
-$ada_properti = $db->querySingle("SELECT COUNT(*) FROM properti");
+$ada_properti = dbValue("SELECT COUNT(*) FROM properti");
 if ($ada_properti > 0) {
     if (php_sapi_name() === 'cli') {
         echo "Database sudah berisi data. Jalankan reset di Pengaturan terlebih dahulu.\n";
@@ -213,7 +213,7 @@ generateTagihanBulanan($db);
 
 // ============ TANDAI DUMMY DATA ============
 // Simpan flag bahwa ini data demo
-$cek_demo = $db->querySingle("SELECT COUNT(*) FROM pengaturan WHERE kunci = 'is_demo'");
+$cek_demo = dbValue("SELECT COUNT(*) FROM pengaturan WHERE kunci = 'is_demo'");
 if (!$cek_demo) {
     $db->exec("INSERT INTO pengaturan (kunci, nilai) VALUES ('is_demo', '1')");
 }

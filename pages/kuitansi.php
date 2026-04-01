@@ -14,9 +14,9 @@ $stmt = $db->prepare("
     LEFT JOIN properti pr ON pm.properti_id = pr.id
     WHERE pm.id = :id
 ");
-$stmt->bindValue(':id', $id, SQLITE3_INTEGER);
-$result = $stmt->execute();
-$data = $result->fetchArray(SQLITE3_ASSOC);
+$stmt->bindValue(':id', $id, PDO::PARAM_INT);
+$stmt->execute();
+$data = $stmt->fetch();
 
 if (!$data) {
     die('Data tidak ditemukan');

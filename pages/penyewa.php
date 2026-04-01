@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($action === 'edit') {
             // Pertahankan bayar_sampai yang sudah ada di database
             $id_temp = (int)$_POST['id'];
-            $bayar_sampai = $db->querySingle("SELECT bayar_sampai FROM penyewa WHERE id = $id_temp");
+            $bayar_sampai = dbValue("SELECT bayar_sampai FROM penyewa WHERE id = $id_temp");
         } else {
             $bayar_sampai = null;
         }
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else {
             $id = (int)$_POST['id'];
-            $old = $db->querySingle("SELECT kamar_id FROM penyewa WHERE id = $id");
+            $old = dbValue("SELECT kamar_id FROM penyewa WHERE id = $id");
             if ($old && $old != $kamar_id) {
                 $db->exec("UPDATE kamar SET status = 'Kosong' WHERE id = $old");
             }
@@ -67,22 +67,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $db->exec("UPDATE kamar SET status = 'Terisi' WHERE id = $kamar_id");
             }
             $stmt = $db->prepare("UPDATE penyewa SET nama = :nama, no_hp = :hp, no_ktp = :ktp, foto_ktp = :foto, alamat_asal = :alamat, kamar_id = :kamar, tanggal_masuk = :tgl, tanggal_keluar = :tgl_keluar, tipe_sewa = :tipe, harga_sewa = :harga, jatuh_tempo_tanggal = :jt, bayar_sampai = :bs, status = :status, catatan = :catatan WHERE id = :id");
-            $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         }
-        $stmt->bindValue(':nama', $nama, SQLITE3_TEXT);
-        $stmt->bindValue(':hp', $no_hp, SQLITE3_TEXT);
-        $stmt->bindValue(':ktp', $no_ktp, SQLITE3_TEXT);
-        $stmt->bindValue(':foto', $foto_ktp, SQLITE3_TEXT);
-        $stmt->bindValue(':alamat', $alamat_asal, SQLITE3_TEXT);
-        $stmt->bindValue(':kamar', $kamar_id ?: null, SQLITE3_INTEGER);
-        $stmt->bindValue(':tgl', $tanggal_masuk, SQLITE3_TEXT);
-        $stmt->bindValue(':tgl_keluar', $tanggal_keluar, SQLITE3_TEXT);
-        $stmt->bindValue(':tipe', $tipe_sewa, SQLITE3_TEXT);
-        $stmt->bindValue(':harga', $harga_sewa, SQLITE3_INTEGER);
-        $stmt->bindValue(':jt', $jatuh_tempo_tanggal, SQLITE3_INTEGER);
-        $stmt->bindValue(':bs', $bayar_sampai, SQLITE3_TEXT);
-        $stmt->bindValue(':status', $status, SQLITE3_TEXT);
-        $stmt->bindValue(':catatan', $catatan, SQLITE3_TEXT);
+        $stmt->bindValue(':nama', $nama, PDO::PARAM_STR);
+        $stmt->bindValue(':hp', $no_hp, PDO::PARAM_STR);
+        $stmt->bindValue(':ktp', $no_ktp, PDO::PARAM_STR);
+        $stmt->bindValue(':foto', $foto_ktp, PDO::PARAM_STR);
+        $stmt->bindValue(':alamat', $alamat_asal, PDO::PARAM_STR);
+        $stmt->bindValue(':kamar', $kamar_id ?: null, PDO::PARAM_INT);
+        $stmt->bindValue(':tgl', $tanggal_masuk, PDO::PARAM_STR);
+        $stmt->bindValue(':tgl_keluar', $tanggal_keluar, PDO::PARAM_STR);
+        $stmt->bindValue(':tipe', $tipe_sewa, PDO::PARAM_STR);
+        $stmt->bindValue(':harga', $harga_sewa, PDO::PARAM_INT);
+        $stmt->bindValue(':jt', $jatuh_tempo_tanggal, PDO::PARAM_INT);
+        $stmt->bindValue(':bs', $bayar_sampai, PDO::PARAM_STR);
+        $stmt->bindValue(':status', $status, PDO::PARAM_STR);
+        $stmt->bindValue(':catatan', $catatan, PDO::PARAM_STR);
         $stmt->execute();
 
         header('Location: penyewa.php?pesan=sukses' . ($filter_properti ? "&properti=$filter_properti" : ''));
@@ -92,11 +92,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'hapus') {
         $id = (int)$_POST['id'];
         // Hapus foto KTP
-        $foto = $db->querySingle("SELECT foto_ktp FROM penyewa WHERE id = $id");
+        $foto = dbValue("SELECT foto_ktp FROM penyewa WHERE id = $id");
         if ($foto && file_exists(__DIR__ . '/../uploads/ktp/' . $foto)) {
             unlink(__DIR__ . '/../uploads/ktp/' . $foto);
         }
-        $kamar_id = $db->querySingle("SELECT kamar_id FROM penyewa WHERE id = $id");
+        $kamar_id = dbValue("SELECT kamar_id FROM penyewa WHERE id = $id");
         if ($kamar_id) {
             $db->exec("UPDATE kamar SET status = 'Kosong' WHERE id = $kamar_id");
         }
@@ -107,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'checkout') {
         $id = (int)$_POST['id'];
-        $kamar_id = $db->querySingle("SELECT kamar_id FROM penyewa WHERE id = $id");
+        $kamar_id = dbValue("SELECT kamar_id FROM penyewa WHERE id = $id");
         $db->exec("UPDATE penyewa SET status = 'Nonaktif' WHERE id = $id");
         if ($kamar_id) {
             $db->exec("UPDATE kamar SET status = 'Kosong' WHERE id = $kamar_id");
@@ -121,9 +121,9 @@ $edit_data = null;
 if (isset($_GET['edit'])) {
     $edit_id = (int)$_GET['edit'];
     $stmt = $db->prepare("SELECT * FROM penyewa WHERE id = :id");
-    $stmt->bindValue(':id', $edit_id, SQLITE3_INTEGER);
-    $result = $stmt->execute();
-    $edit_data = $result->fetchArray(SQLITE3_ASSOC);
+    $stmt->bindValue(':id', $edit_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $edit_data = $stmt->fetch();
 }
 
 // Detail penyewa (lihat foto KTP)
@@ -131,8 +131,9 @@ $detail_data = null;
 if (isset($_GET['detail'])) {
     $det_id = (int)$_GET['detail'];
     $stmt = $db->prepare("SELECT p.*, k.nomor_kamar, pr.nama as nama_properti FROM penyewa p LEFT JOIN kamar k ON p.kamar_id = k.id LEFT JOIN properti pr ON k.properti_id = pr.id WHERE p.id = :id");
-    $stmt->bindValue(':id', $det_id, SQLITE3_INTEGER);
-    $detail_data = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+    $stmt->bindValue(':id', $det_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $detail_data = $stmt->fetch();
 }
 
 // Kamar kosong (grouped by properti)
@@ -144,11 +145,11 @@ $kamar_kosong = $db->query("
     ORDER BY pr.nama, k.nomor_kamar
 ");
 $kamar_options = [];
-while ($row = $kamar_kosong->fetchArray(SQLITE3_ASSOC)) {
+while ($row = $kamar_kosong->fetch()) {
     $kamar_options[] = $row;
 }
 if ($edit_data && $edit_data['kamar_id']) {
-    $kmr = $db->querySingle("SELECT k.id, k.nomor_kamar, k.harga_bulanan, k.harga_tahunan, k.properti_id, pr.nama as nama_properti FROM kamar k JOIN properti pr ON k.properti_id = pr.id WHERE k.id = {$edit_data['kamar_id']}", true);
+    $kmr = dbRow("SELECT k.id, k.nomor_kamar, k.harga_bulanan, k.harga_tahunan, k.properti_id, pr.nama as nama_properti FROM kamar k JOIN properti pr ON k.properti_id = pr.id WHERE k.id = {$edit_data['kamar_id']}");
     if ($kmr) {
         $found = false;
         foreach ($kamar_options as $ko) {
@@ -367,7 +368,7 @@ require_once __DIR__ . '/../includes/header.php';
                             ORDER BY p.status ASC, p.nama ASC
                         ");
                         $ada = false;
-                        while ($row = $penyewa_list->fetchArray(SQLITE3_ASSOC)):
+                        while ($row = $penyewa_list->fetch()):
                             $ada = true;
                         ?>
                         <tr class="<?= $row['status'] == 'Nonaktif' ? 'table-secondary' : '' ?>">

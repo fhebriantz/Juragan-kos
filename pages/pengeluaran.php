@@ -26,17 +26,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $id = (int)$_POST['id'];
             $stmt = $db->prepare("UPDATE pengeluaran SET properti_id = :prop, kategori = :kat, sub_kategori = :sub, kamar_id = :kamar, keterangan = :ket, nominal = :nom, tanggal = :tgl, no_meter = :meter, id_pelanggan = :pelanggan WHERE id = :id");
-            $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         }
-        $stmt->bindValue(':prop', $properti_id, SQLITE3_INTEGER);
-        $stmt->bindValue(':kat', $kategori, SQLITE3_TEXT);
-        $stmt->bindValue(':sub', $sub_kategori, SQLITE3_TEXT);
-        $stmt->bindValue(':kamar', $kamar_id, SQLITE3_INTEGER);
-        $stmt->bindValue(':ket', $keterangan, SQLITE3_TEXT);
-        $stmt->bindValue(':nom', $nominal, SQLITE3_INTEGER);
-        $stmt->bindValue(':tgl', $tanggal, SQLITE3_TEXT);
-        $stmt->bindValue(':meter', $no_meter, SQLITE3_TEXT);
-        $stmt->bindValue(':pelanggan', $id_pelanggan, SQLITE3_TEXT);
+        $stmt->bindValue(':prop', $properti_id, PDO::PARAM_INT);
+        $stmt->bindValue(':kat', $kategori, PDO::PARAM_STR);
+        $stmt->bindValue(':sub', $sub_kategori, PDO::PARAM_STR);
+        $stmt->bindValue(':kamar', $kamar_id, PDO::PARAM_INT);
+        $stmt->bindValue(':ket', $keterangan, PDO::PARAM_STR);
+        $stmt->bindValue(':nom', $nominal, PDO::PARAM_INT);
+        $stmt->bindValue(':tgl', $tanggal, PDO::PARAM_STR);
+        $stmt->bindValue(':meter', $no_meter, PDO::PARAM_STR);
+        $stmt->bindValue(':pelanggan', $id_pelanggan, PDO::PARAM_STR);
         $stmt->execute();
 
         header('Location: pengeluaran.php?pesan=sukses' . ($filter_properti ? "&properti=$filter_properti" : '') . "&bulan=$filter_bulan");
@@ -55,9 +55,9 @@ $edit_data = null;
 if (isset($_GET['edit'])) {
     $edit_id = (int)$_GET['edit'];
     $stmt = $db->prepare("SELECT * FROM pengeluaran WHERE id = :id");
-    $stmt->bindValue(':id', $edit_id, SQLITE3_INTEGER);
-    $result = $stmt->execute();
-    $edit_data = $result->fetchArray(SQLITE3_ASSOC);
+    $stmt->bindValue(':id', $edit_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $edit_data = $stmt->fetch();
 }
 
 require_once __DIR__ . '/../includes/header.php';
@@ -149,7 +149,7 @@ require_once __DIR__ . '/../includes/header.php';
             <h6 class="fw-bold mb-3"><i class="bi bi-wallet2 me-2"></i>Riwayat Pengeluaran</h6>
             <?php
             $where_prop = $filter_properti ? "AND pg.properti_id = $filter_properti" : "";
-            $total = $db->querySingle("SELECT COALESCE(SUM(nominal),0) FROM pengeluaran pg WHERE strftime('%Y-%m', tanggal) = '$filter_bulan' $where_prop");
+            $total = dbValue("SELECT COALESCE(SUM(nominal),0) FROM pengeluaran pg WHERE " . sqlYearMonth('tanggal') . " = '$filter_bulan' $where_prop");
             ?>
             <div class="alert alert-warning py-2 mb-3">
                 Total Pengeluaran: <strong><?= formatRupiah($total) ?></strong>
@@ -172,11 +172,11 @@ require_once __DIR__ . '/../includes/header.php';
                             SELECT pg.*, pr.nama as nama_properti
                             FROM pengeluaran pg
                             LEFT JOIN properti pr ON pg.properti_id = pr.id
-                            WHERE strftime('%Y-%m', pg.tanggal) = '$filter_bulan' $where_prop
+                            WHERE " . sqlYearMonth('pg.tanggal') . " = '$filter_bulan' $where_prop
                             ORDER BY pg.tanggal DESC
                         ");
                         $ada = false;
-                        while ($row = $data->fetchArray(SQLITE3_ASSOC)):
+                        while ($row = $data->fetch()):
                             $ada = true;
                         ?>
                         <tr>
