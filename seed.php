@@ -60,41 +60,34 @@ $db->exec("INSERT INTO kamar (id, properti_id, nomor_kamar, fasilitas, harga_bul
 ");
 
 // ============ PENYEWA ============
-// Jatuh tempo dinamis: diambil dari tanggal masuk
+// Jatuh tempo tanggal 1-3 agar alert selalu muncul di dashboard demo
 
 // --- Kos Melati ---
-// Penyewa yang nunggak (jatuh tempo sudah lewat, belum bayar bulan ini)
-$tgl_nunggak1 = date('Y-m-d', strtotime('-4 months'));
-$jt_nunggak1 = (int)date('d', strtotime($tgl_nunggak1));
-
-// Buat jatuh tempo yang sudah lewat beberapa hari lalu
-$tgl_lewat = date('Y-m-d', strtotime('-3 months -5 days'));
-$jt_lewat = max(1, min(28, (int)date('d') - 5)); // 5 hari lalu
-$tgl_lewat_masuk = date('Y-m-d', strtotime("-3 months -" . (date('d') - $jt_lewat) . " days"));
-
-// Penyewa yang mendekati jatuh tempo (1-2 hari lagi)
-$jt_mendekati = min(28, (int)date('d') + 2); // 2 hari lagi
-$tgl_mendekati_masuk = date('Y-m-d', strtotime("-2 months +" . ($jt_mendekati - (int)date('d')) . " days"));
-
-// Penyewa yang sudah bayar bulan ini
-$tgl_aman1 = date('Y-m-d', strtotime('-6 months'));
+// Penyewa nunggak: jatuh tempo tanggal 1 (pasti sudah lewat mulai tanggal 2+)
+$tgl_masuk_andi = date('Y-m-d', strtotime('-3 months'));
+// Penyewa nunggak: jatuh tempo tanggal 2
+$tgl_masuk_budi = date('Y-m-d', strtotime('-4 months'));
+// Penyewa mendekati: jatuh tempo tanggal 3 (saat tanggal 1-3 → mendekati/hari ini)
+$tgl_masuk_citra = date('Y-m-d', strtotime('-2 months'));
+// Penyewa sudah bayar bulan ini
+$tgl_masuk_aman = date('Y-m-d', strtotime('-6 months'));
 
 $db->exec("INSERT INTO penyewa (id, nama, no_hp, no_ktp, alamat_asal, kamar_id, tanggal_masuk, tipe_sewa, jatuh_tempo_tanggal, status) VALUES
-    (1, 'Andi Pratama',    '081234567890', '3273012345670001', 'Garut',        1, '$tgl_lewat_masuk',     'Bulanan', $jt_lewat,     'Aktif'),
-    (2, 'Budi Santoso',    '085678901234', '3273012345670002', 'Sumedang',     2, '$tgl_nunggak1',        'Bulanan', $jt_nunggak1,  'Aktif'),
-    (3, 'Citra Dewi',      '087890123456', '3273012345670003', 'Tasikmalaya',  3, '$tgl_mendekati_masuk', 'Bulanan', $jt_mendekati, 'Aktif'),
-    (4, 'Deni Firmansyah', '089012345678', '3273012345670004', 'Cimahi',       4, '$tgl_aman1',           'Bulanan', " . (int)date('d', strtotime($tgl_aman1)) . ", 'Aktif'),
-    (5, 'Eka Putri',       '081345678901', '3273012345670005', 'Cianjur',      5, '$tgl_aman1',           'Bulanan', " . (int)date('d', strtotime($tgl_aman1)) . ", 'Aktif'),
-    (6, 'Fajar Hidayat',   '082456789012', '3273012345670006', 'Majalengka',   6, '$tgl_aman1',           'Bulanan', " . (int)date('d', strtotime($tgl_aman1)) . ", 'Aktif')
+    (1, 'Andi Pratama',    '081234567890', '3273012345670001', 'Garut',        1, '$tgl_masuk_andi',  'Bulanan', 1, 'Aktif'),
+    (2, 'Budi Santoso',    '085678901234', '3273012345670002', 'Sumedang',     2, '$tgl_masuk_budi',  'Bulanan', 2, 'Aktif'),
+    (3, 'Citra Dewi',      '087890123456', '3273012345670003', 'Tasikmalaya',  3, '$tgl_masuk_citra', 'Bulanan', 3, 'Aktif'),
+    (4, 'Deni Firmansyah', '089012345678', '3273012345670004', 'Cimahi',       4, '$tgl_masuk_aman',  'Bulanan', 1, 'Aktif'),
+    (5, 'Eka Putri',       '081345678901', '3273012345670005', 'Cianjur',      5, '$tgl_masuk_aman',  'Bulanan', 2, 'Aktif'),
+    (6, 'Fajar Hidayat',   '082456789012', '3273012345670006', 'Majalengka',   6, '$tgl_masuk_aman',  'Bulanan', 3, 'Aktif')
 ");
 
 // --- Kontrakan Mawar ---
-// Hana Salsabila: sewa tahunan, bayar_sampai 4 bulan lagi (agar muncul alert sisa 30 hari di demo = tidak, tapi terlihat di daftar penyewa)
+// Hana Salsabila: sewa tahunan, bayar_sampai 4 bulan lagi
 $hana_bayar_sampai = date('Y-m-d', strtotime('+4 months'));
 $db->exec("INSERT INTO penyewa (id, nama, no_hp, no_ktp, alamat_asal, kamar_id, tanggal_masuk, tipe_sewa, jatuh_tempo_tanggal, bayar_sampai, status) VALUES
-    (7, 'Gilang Ramadhan', '083567890123', '3273012345670007', 'Bandung',  9,  '" . date('Y-m-d', strtotime('-5 months')) . "', 'Bulanan', " . (int)date('d', strtotime('-5 months')) . ", NULL, 'Aktif'),
-    (8, 'Hana Salsabila',  '084678901234', '3273012345670008', 'Cirebon',  10, '" . date('Y-m-d', strtotime('-8 months')) . "', 'Tahunan',  " . (int)date('d', strtotime('-8 months')) . ", '$hana_bayar_sampai', 'Aktif'),
-    (9, 'Irfan Maulana',   '085789012345', '3273012345670009', 'Subang',   11, '" . date('Y-m-d', strtotime('-3 months')) . "', 'Bulanan', " . (int)date('d', strtotime('-3 months')) . ", NULL, 'Aktif')
+    (7, 'Gilang Ramadhan', '083567890123', '3273012345670007', 'Bandung',  9,  '" . date('Y-m-d', strtotime('-5 months')) . "', 'Bulanan', 1, NULL, 'Aktif'),
+    (8, 'Hana Salsabila',  '084678901234', '3273012345670008', 'Cirebon',  10, '" . date('Y-m-d', strtotime('-8 months')) . "', 'Tahunan', 1, '$hana_bayar_sampai', 'Aktif'),
+    (9, 'Irfan Maulana',   '085789012345', '3273012345670009', 'Subang',   11, '" . date('Y-m-d', strtotime('-3 months')) . "', 'Bulanan', 2, NULL, 'Aktif')
 ");
 
 // Penyewa harian: check-in 3 hari lalu, checkout besok, bayar 2 malam di awal → sisa 1 malam belum bayar
@@ -138,8 +131,8 @@ foreach ([$bulan_lalu2, $bulan_lalu] as $bln) {
     }
 }
 
-// Bulan ini: hanya beberapa yang sudah bayar (4,5,6,7,8,9 sudah bayar; 1,2,3 belum — jadi muncul alert)
-foreach ([4,5,6,7,8,9] as $pid) {
+// Bulan ini: hanya beberapa yang sudah bayar (4,5,6 sudah bayar; 1,2,3,7,9 belum — jadi muncul alert nunggak/mendekati)
+foreach ([4,5,6] as $pid) {
     $harga = $penyewa_harga[$pid];
     $kamar_id = $penyewa_kamar[$pid][0];
     $prop_id = $penyewa_kamar[$pid][1];
@@ -198,20 +191,21 @@ $db->exec("INSERT INTO maintenance (properti_id, kamar_id, tipe, judul, keterang
 ");
 
 // ============ TEMPLATE TAGIHAN (rutin) ============
+// Jatuh tempo tanggal 1-3 agar alert selalu muncul di demo
 $db->exec("INSERT INTO template_tagihan (properti_id, jenis, keterangan, nominal_default, isi_manual, jatuh_tempo_tanggal, aktif) VALUES
-    (1, 'PLN',      'No. Meter: 541234567890, ID: 12345678901', 0,      1, 20, 1),
-    (2, 'PLN',      'No. Meter: 541234567891, ID: 12345678902', 0,      1, 20, 1),
-    (1, 'PDAM',     'PDAM Kota Bandung',                        0,      1, 15, 1),
-    (1, 'Keamanan', 'Iuran keamanan & sampah RT 05',            200000, 0, 10, 1)
+    (1, 'PLN',      'No. Meter: 541234567890, ID: 12345678901', 0,      1, 1, 1),
+    (2, 'PLN',      'No. Meter: 541234567891, ID: 12345678902', 0,      1, 2, 1),
+    (1, 'PDAM',     'PDAM Kota Bandung',                        0,      1, 2, 1),
+    (1, 'Keamanan', 'Iuran keamanan & sampah RT 05',            200000, 0, 3, 1)
 ");
 
 // ============ TAGIHAN OPERASIONAL ============
 // Bulan lalu — semua sudah bayar
 $db->exec("INSERT INTO tagihan_operasional (properti_id, jenis, nominal, periode, jatuh_tempo, keterangan, tipe, status, tanggal_bayar) VALUES
-    (1, 'PLN',      1050000, '$bulan_lalu', '$bulan_lalu-20', 'No. Meter: 541234567890', 'Rutin', 'Sudah Bayar', '$bulan_lalu-20'),
-    (2, 'PLN',      750000,  '$bulan_lalu', '$bulan_lalu-20', 'No. Meter: 541234567891', 'Rutin', 'Sudah Bayar', '$bulan_lalu-21'),
-    (1, 'PDAM',     320000,  '$bulan_lalu', '$bulan_lalu-15', 'PDAM Kota Bandung',       'Rutin', 'Sudah Bayar', '$bulan_lalu-15'),
-    (1, 'Keamanan', 200000,  '$bulan_lalu', '$bulan_lalu-10', 'Iuran keamanan & sampah', 'Rutin', 'Sudah Bayar', '$bulan_lalu-10')
+    (1, 'PLN',      1050000, '$bulan_lalu', '$bulan_lalu-01', 'No. Meter: 541234567890', 'Rutin', 'Sudah Bayar', '$bulan_lalu-01'),
+    (2, 'PLN',      750000,  '$bulan_lalu', '$bulan_lalu-02', 'No. Meter: 541234567891', 'Rutin', 'Sudah Bayar', '$bulan_lalu-02'),
+    (1, 'PDAM',     320000,  '$bulan_lalu', '$bulan_lalu-02', 'PDAM Kota Bandung',       'Rutin', 'Sudah Bayar', '$bulan_lalu-02'),
+    (1, 'Keamanan', 200000,  '$bulan_lalu', '$bulan_lalu-03', 'Iuran keamanan & sampah', 'Rutin', 'Sudah Bayar', '$bulan_lalu-03')
 ");
 
 // Bulan ini — otomatis dari template

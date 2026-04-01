@@ -108,7 +108,7 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="row g-4">
     <div class="col-lg-4">
         <div class="form-wrapper">
-            <h6 class="fw-bold mb-3"><?= $edit_data ? 'Edit Maintenance' : 'Catat Maintenance' ?></h6>
+            <h6 class="fw-bold mb-3"><i class="bi bi-<?= $edit_data ? 'pencil-square' : 'wrench' ?> me-2"></i><?= $edit_data ? 'Edit Maintenance' : 'Catat Maintenance' ?></h6>
             <form method="POST">
                 <input type="hidden" name="action" value="<?= $edit_data ? 'edit' : 'tambah' ?>">
                 <?php if ($edit_data): ?>
@@ -190,7 +190,7 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
     </div>
 
-    <div class="col-lg-8">
+    <div class="col-lg-8 d-flex flex-column">
         <!-- Rekap per Kamar -->
         <div class="table-wrapper mb-4">
             <h6 class="fw-bold mb-3"><i class="bi bi-bar-chart me-2"></i>Rekap Biaya Maintenance per Kamar (<?= $filter_tahun ?>)</h6>
@@ -257,8 +257,8 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
 
         <!-- Riwayat Detail -->
-        <div class="table-wrapper">
-            <h6 class="fw-bold mb-3">Riwayat Maintenance</h6>
+        <div class="table-wrapper flex-grow-1" style="max-height: 500px; overflow-y: auto;">
+            <h6 class="fw-bold mb-3"><i class="bi bi-tools me-2"></i>Riwayat Maintenance</h6>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead>

@@ -314,7 +314,7 @@ require_once 'includes/header.php';
         <?php elseif ($_GET['pesan'] === 'sewa_dibayar'): ?>
             <i class="bi bi-check-circle me-1"></i> Pembayaran sewa berhasil dicatat!
             <?php if (isset($_GET['cetak'])): ?>
-                <a href="pages/kuitansi.php?id=<?= (int)$_GET['cetak'] ?>" class="alert-link ms-2" target="_blank"><i class="bi bi-printer"></i> Cetak Kuitansi</a>
+                <a href="javascript:void(0)" onclick="appPrint('pages/kuitansi.php?id=<?= (int)$_GET['cetak'] ?>')" class="alert-link ms-2"><i class="bi bi-printer"></i> Cetak Kuitansi</a>
             <?php endif; ?>
         <?php endif; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -338,7 +338,7 @@ require_once 'includes/header.php';
 
 <!-- Filter Properti -->
 <div class="mb-3 no-print">
-    <form class="d-flex gap-2 align-items-center" method="GET">
+    <form class="d-flex gap-2 align-items-center flex-wrap" method="GET">
         <label class="form-label mb-0 fw-semibold">Properti:</label>
         <select name="properti" class="form-select form-select-sm" style="width: auto; min-width: 200px;" onchange="this.form.submit()">
             <option value="">-- Semua Properti --</option>
@@ -350,6 +350,29 @@ require_once 'includes/header.php';
         </select>
     </form>
 </div>
+
+<?php if (empty($properti_list) && !$is_demo): ?>
+<div class="alert alert-secondary border-0 shadow-sm mb-4">
+    <div class="d-flex align-items-center flex-wrap gap-3">
+        <i class="bi bi-inbox fs-3 text-muted"></i>
+        <div class="flex-grow-1">
+            <strong>Database Kosong</strong>
+            <div class="small text-muted">Belum ada data. Isi data demo untuk menjelajahi fitur aplikasi, atau mulai tambah data properti Anda sendiri.</div>
+        </div>
+        <div class="d-flex gap-2">
+            <form method="POST" action="pages/pengaturan.php" class="d-inline">
+                <input type="hidden" name="action" value="isi_demo">
+                <button type="submit" class="btn btn-info btn-sm">
+                    <i class="bi bi-box-seam me-1"></i> Isi Data Demo (<?= date('F Y') ?>)
+                </button>
+            </form>
+            <a href="pages/properti.php" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i> Tambah Properti
+            </a>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <?php
 // ==================== ALERT AREA ====================
@@ -668,11 +691,11 @@ if ($ada_alert):
                                     </a>
                                     <?php endif; ?>
                                     <?php else: ?>
-                                    <form method="POST" class="d-inline">
+                                    <form method="POST" class="d-inline" data-confirm="Checkout <?= htmlspecialchars($ah['nama']) ?>?">
                                         <input type="hidden" name="action" value="checkout_harian">
                                         <input type="hidden" name="penyewa_id" value="<?= $ah['id'] ?>">
                                         <input type="hidden" name="filter_properti" value="<?= $filter_properti ?>">
-                                        <button type="submit" class="btn btn-sm btn-outline-secondary w-100" onclick="return confirm('Checkout <?= htmlspecialchars($ah['nama']) ?>?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary w-100">
                                             <i class="bi bi-box-arrow-right me-1"></i>Checkout
                                         </button>
                                     </form>

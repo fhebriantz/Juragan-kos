@@ -89,7 +89,7 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="row g-4">
     <div class="col-lg-4">
         <div class="form-wrapper">
-            <h6 class="fw-bold mb-3"><?= $edit_data ? 'Edit Pengeluaran' : 'Catat Pengeluaran' ?></h6>
+            <h6 class="fw-bold mb-3"><i class="bi bi-<?= $edit_data ? 'pencil-square' : 'plus-circle' ?> me-2"></i><?= $edit_data ? 'Edit Pengeluaran' : 'Catat Pengeluaran' ?></h6>
             <form method="POST">
                 <input type="hidden" name="action" value="<?= $edit_data ? 'edit' : 'tambah' ?>">
                 <?php if ($edit_data): ?>
@@ -146,7 +146,7 @@ require_once __DIR__ . '/../includes/header.php';
 
     <div class="col-lg-8">
         <div class="table-wrapper">
-            <h6 class="fw-bold mb-3">Riwayat Pengeluaran</h6>
+            <h6 class="fw-bold mb-3"><i class="bi bi-wallet2 me-2"></i>Riwayat Pengeluaran</h6>
             <?php
             $where_prop = $filter_properti ? "AND pg.properti_id = $filter_properti" : "";
             $total = $db->querySingle("SELECT COALESCE(SUM(nominal),0) FROM pengeluaran pg WHERE strftime('%Y-%m', tanggal) = '$filter_bulan' $where_prop");

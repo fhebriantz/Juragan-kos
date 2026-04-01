@@ -95,7 +95,6 @@ function terbilang($angka) {
 
 <div class="btn-print">
     <button onclick="window.print()"><b>Cetak Kuitansi</b></button>
-    <button onclick="window.close()" style="background: #6c757d;">Tutup</button>
 </div>
 
 <div class="kuitansi">

@@ -8,8 +8,9 @@ Aplikasi manajemen kos & kontrakan berbasis web. Mendukung multi-properti, 3 tip
 |----------|-----------|
 | Backend | PHP Native (minimal 8.1, tanpa framework) |
 | Database | SQLite (file-based, tanpa MySQL) |
-| Frontend | Bootstrap 5.3 + Bootstrap Icons |
+| Frontend | Bootstrap 5.3 + Bootstrap Icons (responsive mobile) |
 | Grafik | Chart.js 4 |
+| Desktop | PHP Desktop (opsional, untuk build .exe) |
 | Server | PHP Built-in Server / Apache / Nginx |
 
 ## Persyaratan
@@ -17,6 +18,7 @@ Aplikasi manajemen kos & kontrakan berbasis web. Mendukung multi-properti, 3 tip
 - PHP >= 8.1 dengan ekstensi `sqlite3` dan `gd` (untuk upload gambar)
 - Browser modern (Chrome, Firefox, Edge, Safari)
 - Koneksi internet hanya untuk CDN Bootstrap & Chart.js (bisa di-offline-kan)
+- Responsive: mendukung desktop, tablet, dan mobile (termasuk layar ≤420px)
 
 ## Instalasi
 
@@ -62,10 +64,11 @@ juragan-kos/
 │   ├── pengaturan.php          # Setting umum + reset data
 │   └── bantuan.php             # Panduan penggunaan lengkap
 ├── assets/
-│   ├── css/style.css           # Custom styles + print CSS
-│   └── js/app.js               # Sidebar toggle, confirm delete, format rupiah
+│   ├── css/style.css           # Custom styles + responsive mobile + print CSS
+│   └── js/app.js               # Sidebar toggle, toast/confirm/print modals, warna sidebar, format rupiah
 ├── uploads/
-│   └── ktp/                    # Foto KTP penyewa (git-ignored)
+│   ├── ktp/                    # Foto KTP penyewa (git-ignored)
+│   └── logo/                   # Logo usaha (git-ignored)
 ├── database/                   # Folder database (git-ignored)
 │   └── juragan_kos.db          # File SQLite
 ├── phpdesktop/                 # PHP Desktop runtime (git-ignored, download manual)
@@ -193,11 +196,29 @@ properti (1) ──→ (N) kamar (1) ──→ (N) penyewa
 - Layout profesional: nama properti, alamat, penyewa, kamar, nominal, terbilang otomatis
 - Akses dari Pemasukan (ikon printer) atau Dashboard (setelah catat bayar)
 
-### Pengaturan & Reset
+### Pengaturan & Kustomisasi
 - Setting: nama usaha, nama pemilik, no HP
+- **Upload Logo:** logo ditampilkan di sidebar (PNG, JPG, WebP, maks 2 MB)
+- **Warna Sidebar:** 12 preset warna + color picker kustom, live preview
+- **Mode Font Sidebar:** Light (untuk background gelap) / Dark (untuk background terang)
+- **Isi Data Demo:** mengisi database dengan data contoh langsung dari halaman Pengaturan
 - **Reset Transaksi:** hapus pemasukan/pengeluaran/maintenance/tagihan, properti/kamar/penyewa aman
 - **Reset Database:** hapus semua data, mulai dari nol
 - Proteksi: kode konfirmasi + dialog confirm
+
+### Responsive Mobile
+- Layout adaptif untuk semua ukuran layar (desktop, tablet, mobile)
+- Sidebar overlay dengan backdrop di mobile (buka/tutup via hamburger menu)
+- Sidebar otomatis tertutup saat klik menu (mobile)
+- Compact UI: stat card, tabel, form, alert, badge semua menyesuaikan layar kecil
+- Modal full-width di mobile, input font-size 16px (mencegah auto-zoom iOS)
+- Extra small (≤420px): layout ultra-compact untuk HP layar kecil
+
+### Kompatibilitas PHP Desktop
+- `appAlert()` — pengganti `alert()` bawaan browser, menggunakan Bootstrap Toast
+- `appConfirm()` — pengganti `confirm()`, menggunakan Bootstrap Modal
+- `appPrint()` — pengganti `window.print()` / `window.open()`, menggunakan iframe dalam modal
+- Semua dialog berfungsi di browser biasa maupun PHP Desktop (Chromium embedded)
 
 ### Bantuan (How-To)
 - Cara mulai menggunakan (6 langkah)
@@ -226,8 +247,8 @@ Semua masuk ke Laporan Keuangan. Tidak ada data yang tercatat dua kali.
   - `getPengaturan($db, $kunci)` — ambil value dari tabel pengaturan
   - `getPropertiList($db)` — ambil semua properti untuk dropdown
   - `generateTagihanBulanan($db)` — auto-generate tagihan dari template
-- CSS custom di `assets/css/style.css` + `@media print`
-- JavaScript minimal di `assets/js/app.js`
+- CSS custom di `assets/css/style.css` + responsive mobile (`@media 768px`, `@media 420px`) + `@media print`
+- JavaScript di `assets/js/app.js`: sidebar toggle, warna sidebar, global alert/confirm/print (PHP Desktop compatible), format rupiah
 
 ## Build Desktop (PHP Desktop)
 

@@ -445,16 +445,28 @@ require_once __DIR__ . '/../includes/header.php';
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#helpReset">
-                            <i class="bi bi-gear me-2"></i> Pengaturan & Reset Data
+                            <i class="bi bi-gear me-2"></i> Pengaturan, Kustomisasi & Reset Data
                         </button>
                     </h2>
                     <div id="helpReset" class="accordion-collapse collapse" data-bs-parent="#accordionBantuan">
                         <div class="accordion-body">
                             <h6 class="fw-bold">Pengaturan Umum</h6>
                             <ul class="small">
+                                <li><strong>Logo Usaha</strong> — Upload logo (PNG, JPG, WebP, maks 2 MB). Ditampilkan di sidebar. Bisa dihapus kapan saja.</li>
                                 <li><strong>Nama Usaha</strong> — Ditampilkan di sidebar aplikasi.</li>
                                 <li><strong>Nama Pemilik & No. HP</strong> — Ditampilkan di kuitansi pembayaran.</li>
                             </ul>
+
+                            <h6 class="fw-bold mt-3">Kustomisasi Warna Sidebar</h6>
+                            <ul class="small">
+                                <li><strong>Warna Preset</strong> — Pilih dari 12 warna yang tersedia (klik kotak warna). Perubahan langsung terlihat di sidebar.</li>
+                                <li><strong>Warna Kustom</strong> — Gunakan color picker untuk memilih warna bebas. Kode warna ditampilkan di samping.</li>
+                                <li><strong>Mode Font</strong> — Pilih <em>Light</em> (font putih, untuk sidebar gelap) atau <em>Dark</em> (font hitam, untuk sidebar terang). Sesuaikan dengan warna sidebar yang dipilih.</li>
+                                <li>Pratinjau warna + font langsung terlihat sebelum disimpan.</li>
+                            </ul>
+
+                            <h6 class="fw-bold mt-3">Isi Data Demo</h6>
+                            <p class="small">Mengisi database dengan data contoh (2 properti, 12 kamar, 10 penyewa, transaksi 3 bulan terakhir) berdasarkan bulan aktif. Hanya bisa dilakukan jika database kosong. Reset database dulu jika masih ada data.</p>
 
                             <h6 class="fw-bold mt-3">Reset Transaksi</h6>
                             <p class="small">Menghapus semua catatan keuangan: pemasukan, pengeluaran, maintenance, dan tagihan operasional. Data properti, kamar, dan penyewa <strong>tetap aman</strong>. Berguna jika ingin mulai pencatatan dari awal tanpa harus daftar ulang kamar dan penyewa.</p>
@@ -640,6 +652,43 @@ require_once __DIR__ . '/../includes/header.php';
                     <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
                         <div class="accordion-body small">
                             Bisa. Saat mendaftarkan penyewa, pilih <strong>Tipe Sewa: Tahunan</strong>. Saat mencatat pembayaran di Pemasukan, isi nominal dengan harga tahunan. Perlu dicatat bahwa pengingat di Dashboard tetap per bulan, jadi setelah mencatat bayar tahunan, pengingat bulan-bulan berikutnya tetap perlu dicatat (bisa dengan nominal Rp 0 dan keterangan "sudah bayar tahunan").
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq7">
+                            Bisa diakses dari HP / tablet?
+                        </button>
+                    </h2>
+                    <div id="faq7" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                        <div class="accordion-body small">
+                            <p>Bisa. Aplikasi sudah <strong>responsive</strong> — tampilan otomatis menyesuaikan layar HP dan tablet. Fitur mobile meliputi:</p>
+                            <ul class="mb-0">
+                                <li>Sidebar menjadi overlay (buka/tutup via tombol hamburger di kiri atas).</li>
+                                <li>Tabel, form, kartu statistik, dan badge semuanya menyesuaikan layar kecil.</li>
+                                <li>Modal (popup) full-width di layar HP.</li>
+                                <li>Input tidak auto-zoom di iOS.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq8">
+                            Bagaimana cara mengubah warna sidebar?
+                        </button>
+                    </h2>
+                    <div id="faq8" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                        <div class="accordion-body small">
+                            <ol class="mb-0">
+                                <li>Buka menu <strong>Pengaturan</strong>.</li>
+                                <li>Di bagian <strong>Warna Sidebar</strong>, klik salah satu kotak warna preset atau gunakan color picker untuk warna kustom.</li>
+                                <li>Jika sidebar menggunakan warna terang (kuning, oranye, dll), ubah <strong>Mode Font</strong> ke <em>Dark</em> agar teks terbaca.</li>
+                                <li>Klik <strong>Simpan Warna</strong>. Perubahan langsung terlihat.</li>
+                            </ol>
                         </div>
                     </div>
                 </div>

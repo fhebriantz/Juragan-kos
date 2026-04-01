@@ -7,10 +7,15 @@
     --info-color: #36b9cc;
 }
 
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f8f9fc;
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 /* Sidebar */
@@ -31,7 +36,14 @@ body {
     margin-bottom: 2px;
     padding: 10px 15px;
     font-size: 0.9rem;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+/* Default: font terang (untuk background gelap) */
+.sidebar.text-white .nav-link,
+.sidebar.text-white .sidebar-header small,
+.sidebar.text-white .sidebar-header h5 {
+    color: #fff !important;
 }
 
 .sidebar .nav-link:hover,
@@ -43,10 +55,45 @@ body {
     font-weight: 600;
 }
 
+/* Sidebar Font Dark Mode (untuk background terang) */
+.sidebar.font-dark .sidebar-header {
+    border-bottom-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+.sidebar.font-dark .nav-link {
+    color: #212529 !important;
+}
+
+.sidebar.font-dark .nav-link:hover,
+.sidebar.font-dark .nav-link.active {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar.font-dark .sidebar-header small,
+.sidebar.font-dark .sidebar-header h5 {
+    color: #212529 !important;
+}
+
+.sidebar.font-dark .text-muted {
+    color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.sidebar.font-dark hr {
+    border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+.sidebar-logo {
+    max-height: 48px;
+    max-width: 140px;
+    object-fit: contain;
+    border-radius: 6px;
+}
+
 .content-wrapper {
     margin-left: var(--sidebar-width);
     transition: all 0.3s;
     min-height: 100vh;
+    min-width: 0;
 }
 
 .content-wrapper.expanded {
@@ -77,6 +124,7 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 1.4rem;
+    flex-shrink: 0;
 }
 
 /* Alert Cards */
@@ -109,12 +157,19 @@ body {
     padding: 1.5rem;
 }
 
+/* Equal height: wrapper otomatis isi penuh kolom jika satu-satunya child */
+.row > [class*="col"] > .form-wrapper:only-child,
+.row > [class*="col"] > .table-wrapper:only-child {
+    height: 100%;
+}
+
 .table th {
     font-weight: 600;
     font-size: 0.85rem;
     text-transform: uppercase;
     color: #6c757d;
     border-bottom: 2px solid #dee2e6;
+    white-space: nowrap;
 }
 
 /* Badge */
@@ -133,6 +188,35 @@ body {
     padding: 1.5rem;
 }
 
+/* Preset Warna Sidebar */
+.btn-preset-warna {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 2px solid #dee2e6;
+    padding: 3px;
+    cursor: pointer;
+    background: transparent;
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+.btn-preset-warna span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+}
+
+.btn-preset-warna:hover {
+    border-color: #6c757d;
+    transform: scale(1.1);
+}
+
+.btn-preset-warna.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(78, 115, 223, 0.4);
+}
+
 /* Print */
 @media print {
     .sidebar, .navbar, .no-print {
@@ -146,7 +230,24 @@ body {
     }
 }
 
-/* Responsive */
+/* ==================== RESPONSIVE MOBILE ==================== */
+
+/* Overlay backdrop saat sidebar terbuka di mobile */
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+.sidebar-backdrop.show {
+    display: block;
+}
+
 @media (max-width: 768px) {
     .sidebar {
         margin-left: calc(-1 * var(--sidebar-width));
@@ -156,5 +257,186 @@ body {
     }
     .content-wrapper {
         margin-left: 0;
+    }
+
+    /* Kurangi padding container */
+    .container-fluid {
+        padding: 1rem !important;
+    }
+
+    /* Table & Form wrapper lebih compact */
+    .table-wrapper,
+    .form-wrapper {
+        padding: 1rem;
+        border-radius: 10px;
+    }
+
+    /* Stat card compact */
+    .stat-card .card-body {
+        padding: 0.85rem;
+    }
+    .stat-card .stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+    .stat-card .fw-bold {
+        font-size: 1.15rem !important;
+    }
+
+    /* Alert notifikasi compact */
+    #alertArea .alert {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    #alertArea .alert .fs-4 {
+        font-size: 1.15rem !important;
+    }
+    #alertArea .alert .small {
+        font-size: 0.78rem;
+    }
+
+    /* Navbar compact */
+    .navbar {
+        padding: 0.4rem 0.75rem !important;
+    }
+
+    /* Filter properti full width */
+    .form-select[name="properti"] {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Modal full-width di mobile */
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    .modal-dialog.modal-lg {
+        max-width: calc(100vw - 1rem);
+    }
+
+    /* Table font size */
+    .table {
+        font-size: 0.82rem;
+    }
+    .table td, .table th {
+        padding: 0.5rem 0.4rem;
+    }
+
+    /* Button group di tabel lebih compact */
+    .table .btn-sm {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+
+    /* Badge lebih kecil */
+    .badge-status {
+        padding: 3px 8px;
+        font-size: 0.7rem;
+    }
+
+    /* Form labels */
+    .form-label {
+        font-size: 0.85rem;
+    }
+
+    /* Fix modal geser saat keyboard muncul */
+    .modal {
+        padding-right: 0 !important;
+    }
+    .modal-open {
+        padding-right: 0 !important;
+        overflow: hidden;
+    }
+    .modal-dialog {
+        max-width: calc(100vw - 1rem);
+    }
+    .modal-body .input-group,
+    .modal-body .form-control,
+    .modal-body .form-select {
+        font-size: 16px; /* Cegah zoom iOS saat focus input */
+    }
+
+    /* Alert card layout mobile */
+    .alert-card .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .alert-card .d-flex.justify-content-between .text-end {
+        text-align: left !important;
+    }
+    .alert-card .d-flex.justify-content-between .text-end .d-flex {
+        flex-direction: row !important;
+    }
+
+    /* Detail penyewa table */
+    .table-borderless td[style*="width:160px"] {
+        width: auto !important;
+    }
+}
+
+/* Extra small (375px dan bawah) */
+@media (max-width: 420px) {
+    .container-fluid {
+        padding: 0.75rem !important;
+    }
+
+    .table-wrapper,
+    .form-wrapper {
+        padding: 0.75rem;
+        margin-left: -0.15rem;
+        margin-right: -0.15rem;
+    }
+
+    /* Stat cards 2 kolom */
+    .stat-card .card-body {
+        padding: 0.75rem;
+    }
+    .stat-card .stat-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+        margin-right: 0.5rem !important;
+    }
+
+    /* Page title di navbar */
+    .navbar .navbar-text {
+        font-size: 0.85rem;
+    }
+
+    /* Sembunyikan tanggal di navbar mobile */
+    .navbar .navbar-text.text-muted {
+        display: none;
+    }
+
+    /* Alert area ultra compact */
+    #alertArea .alert {
+        padding: 0.5rem 0.65rem;
+        font-size: 0.8rem;
+    }
+    #alertArea .alert .me-3 {
+        margin-right: 0.5rem !important;
+    }
+
+    /* Modal cetak iframe lebih pendek */
+    #cetakFrame {
+        height: 350px !important;
+    }
+
+    /* Tombol aksi di tabel stack vertikal jika perlu */
+    .table .d-inline {
+        display: inline !important;
+    }
+    .table .btn-sm {
+        padding: 0.2rem 0.35rem;
+        font-size: 0.72rem;
+    }
+
+    /* Properti card di dashboard */
+    .card .card-header {
+        padding: 0.6rem 0.75rem;
+    }
+    .card .card-body {
+        padding: 0.75rem;
     }
 }

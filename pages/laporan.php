@@ -112,7 +112,7 @@ if ($filter_properti) {
             <?php endfor; ?>
         </select>
         <button type="submit" class="btn btn-sm btn-outline-primary">Tampilkan</button>
-        <button type="button" class="btn btn-sm btn-outline-secondary no-print" onclick="window.print()"><i class="bi bi-printer me-1"></i>Cetak</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary no-print" onclick="appPrintPage()"><i class="bi bi-printer me-1"></i>Cetak</button>
     </form>
 </div>
 
@@ -120,25 +120,40 @@ if ($filter_properti) {
 <div class="row g-3 mb-4">
     <div class="col-md-4">
         <div class="card stat-card border-start border-4 border-success">
-            <div class="card-body">
-                <div class="text-muted small">Total Pemasukan <?= $filter_tahun ?></div>
-                <div class="fw-bold fs-4 text-success"><?= formatRupiah($total_pemasukan_tahun) ?></div>
+            <div class="card-body d-flex align-items-center">
+                <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Total Pemasukan <?= $filter_tahun ?></div>
+                    <div class="fw-bold fs-4 text-success"><?= formatRupiah($total_pemasukan_tahun) ?></div>
+                </div>
             </div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card stat-card border-start border-4 border-danger">
-            <div class="card-body">
-                <div class="text-muted small">Total Pengeluaran <?= $filter_tahun ?></div>
-                <div class="fw-bold fs-4 text-danger"><?= formatRupiah($total_pengeluaran_tahun) ?></div>
+            <div class="card-body d-flex align-items-center">
+                <div class="stat-icon bg-danger bg-opacity-10 text-danger me-3">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Total Pengeluaran <?= $filter_tahun ?></div>
+                    <div class="fw-bold fs-4 text-danger"><?= formatRupiah($total_pengeluaran_tahun) ?></div>
+                </div>
             </div>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card stat-card border-start border-4 <?= $laba_tahun >= 0 ? 'border-primary' : 'border-warning' ?>">
-            <div class="card-body">
-                <div class="text-muted small">Laba Bersih <?= $filter_tahun ?></div>
-                <div class="fw-bold fs-4 <?= $laba_tahun >= 0 ? 'text-primary' : 'text-danger' ?>"><?= formatRupiah($laba_tahun) ?></div>
+            <div class="card-body d-flex align-items-center">
+                <div class="stat-icon <?= $laba_tahun >= 0 ? 'bg-primary bg-opacity-10 text-primary' : 'bg-warning bg-opacity-10 text-warning' ?> me-3">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+                <div>
+                    <div class="text-muted small">Laba Bersih <?= $filter_tahun ?></div>
+                    <div class="fw-bold fs-4 <?= $laba_tahun >= 0 ? 'text-primary' : 'text-danger' ?>"><?= formatRupiah($laba_tahun) ?></div>
+                </div>
             </div>
         </div>
     </div>

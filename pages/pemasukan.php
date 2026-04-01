@@ -105,7 +105,7 @@ require_once __DIR__ . '/../includes/header.php';
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         Data pemasukan berhasil <?= $_GET['pesan'] === 'dihapus' ? 'dihapus' : 'disimpan' ?>!
         <?php if (isset($_GET['cetak'])): ?>
-            <a href="kuitansi.php?id=<?= (int)$_GET['cetak'] ?>" class="alert-link ms-2" target="_blank"><i class="bi bi-printer"></i> Cetak Kuitansi</a>
+            <a href="javascript:void(0)" onclick="appPrint('kuitansi.php?id=<?= (int)$_GET['cetak'] ?>')" class="alert-link ms-2"><i class="bi bi-printer"></i> Cetak Kuitansi</a>
         <?php endif; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
@@ -130,7 +130,7 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="row g-4">
     <div class="col-lg-4">
         <div class="form-wrapper">
-            <h6 class="fw-bold mb-3"><?= $edit_data ? 'Edit Pemasukan' : 'Catat Pemasukan' ?></h6>
+            <h6 class="fw-bold mb-3"><i class="bi bi-<?= $edit_data ? 'pencil-square' : 'plus-circle' ?> me-2"></i><?= $edit_data ? 'Edit Pemasukan' : 'Catat Pemasukan' ?></h6>
             <form method="POST">
                 <input type="hidden" name="action" value="<?= $edit_data ? 'edit' : 'tambah' ?>">
                 <?php if ($edit_data): ?>
@@ -215,7 +215,7 @@ require_once __DIR__ . '/../includes/header.php';
 
     <div class="col-lg-8">
         <div class="table-wrapper">
-            <h6 class="fw-bold mb-3">Riwayat Pemasukan</h6>
+            <h6 class="fw-bold mb-3"><i class="bi bi-cash-stack me-2"></i>Riwayat Pemasukan</h6>
             <?php
             $where_prop = $filter_properti ? "AND pm.properti_id = $filter_properti" : "";
             $total = $db->querySingle("SELECT COALESCE(SUM(nominal),0) FROM pemasukan pm WHERE strftime('%Y-%m', tanggal) = '$filter_bulan' $where_prop");
@@ -260,7 +260,7 @@ require_once __DIR__ . '/../includes/header.php';
                             <td><span class="badge bg-success badge-status"><?= $row['kategori'] ?></span></td>
                             <td class="text-end fw-semibold text-success"><?= formatRupiah($row['nominal']) ?></td>
                             <td class="text-center">
-                                <a href="kuitansi.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-outline-info" title="Cetak" target="_blank"><i class="bi bi-printer"></i></a>
+                                <a href="javascript:void(0)" onclick="appPrint('kuitansi.php?id=<?= $row['id'] ?>')" class="btn btn-sm btn-outline-info" title="Cetak"><i class="bi bi-printer"></i></a>
                                 <a href="pemasukan.php?edit=<?= $row['id'] ?>&properti=<?= $filter_properti ?>&bulan=<?= $filter_bulan ?>" class="btn btn-sm btn-outline-primary" title="Edit"><i class="bi bi-pencil"></i></a>
                                 <form method="POST" class="d-inline">
                                     <input type="hidden" name="action" value="hapus">

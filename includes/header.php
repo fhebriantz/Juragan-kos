@@ -4,6 +4,10 @@ if (!isset($db)) {
 }
 $page_title = $page_title ?? 'Dashboard';
 $nama_usaha = getPengaturan($db, 'nama_usaha');
+$logo_file = getPengaturan($db, 'logo');
+$logo_path = $logo_file ? ($base_url ?? '.') . '/uploads/logo/' . $logo_file : '';
+$warna_sidebar = getPengaturan($db, 'warna_sidebar');
+$mode_font_sidebar = getPengaturan($db, 'mode_font_sidebar') ?: 'light';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -18,54 +22,61 @@ $nama_usaha = getPengaturan($db, 'nama_usaha');
 <body>
 <div class="d-flex" id="wrapper">
     <!-- Sidebar -->
-    <div class="sidebar bg-dark text-white" id="sidebar">
+    <div class="sidebar <?= $mode_font_sidebar === 'dark' ? 'font-dark' : 'text-white' ?>" id="sidebar" style="background-color: <?= htmlspecialchars($warna_sidebar ?: '#212529') ?>">
         <div class="sidebar-header p-3 text-center border-bottom border-secondary">
-            <h5 class="mb-0"><i class="bi bi-house-door-fill"></i> Juragan Kos</h5>
-            <small class="text-muted"><?= htmlspecialchars($nama_usaha) ?></small>
+            <?php if ($logo_path): ?>
+                <img src="<?= htmlspecialchars($logo_path) ?>" alt="Logo" class="sidebar-logo mb-1">
+                <small class="d-block fw-semibold"><?= htmlspecialchars($nama_usaha ?: 'Juragan Kos') ?></small>
+            <?php else: ?>
+                <h5 class="mb-0"><i class="bi bi-house-door-fill"></i> <?= htmlspecialchars($nama_usaha ?: 'Juragan Kos') ?></h5>
+            <?php endif; ?>
         </div>
         <nav class="nav flex-column p-2">
-            <a class="nav-link text-white <?= $page_title == 'Dashboard' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/index.php">
+            <a class="nav-link <?= $page_title == 'Dashboard' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/index.php">
                 <i class="bi bi-speedometer2 me-2"></i> Dashboard
             </a>
             <hr class="border-secondary my-1">
             <small class="text-muted px-3 mb-1">KELOLA</small>
-            <a class="nav-link text-white <?= $page_title == 'Properti' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/properti.php">
+            <a class="nav-link <?= $page_title == 'Properti' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/properti.php">
                 <i class="bi bi-building me-2"></i> Properti
             </a>
-            <a class="nav-link text-white <?= $page_title == 'Kamar' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/kamar.php">
+            <a class="nav-link <?= $page_title == 'Kamar' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/kamar.php">
                 <i class="bi bi-door-open me-2"></i> Kamar
             </a>
-            <a class="nav-link text-white <?= $page_title == 'Penyewa' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/penyewa.php">
+            <a class="nav-link <?= $page_title == 'Penyewa' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/penyewa.php">
                 <i class="bi bi-people me-2"></i> Penyewa
             </a>
             <hr class="border-secondary my-1">
             <small class="text-muted px-3 mb-1">KEUANGAN</small>
-            <a class="nav-link text-white <?= $page_title == 'Pemasukan' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/pemasukan.php">
+            <a class="nav-link <?= $page_title == 'Pemasukan' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/pemasukan.php">
                 <i class="bi bi-cash-stack me-2"></i> Pemasukan
             </a>
-            <a class="nav-link text-white <?= $page_title == 'Pengeluaran' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/pengeluaran.php">
+            <a class="nav-link <?= $page_title == 'Pengeluaran' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/pengeluaran.php">
                 <i class="bi bi-wallet2 me-2"></i> Pengeluaran
             </a>
-            <a class="nav-link text-white <?= $page_title == 'Maintenance' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/maintenance.php">
+            <a class="nav-link <?= $page_title == 'Maintenance' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/maintenance.php">
                 <i class="bi bi-tools me-2"></i> Maintenance
             </a>
-            <a class="nav-link text-white <?= $page_title == 'Tagihan Operasional' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/tagihan_operasional.php">
+            <a class="nav-link <?= $page_title == 'Tagihan Operasional' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/tagihan_operasional.php">
                 <i class="bi bi-lightning me-2"></i> Tagihan Operasional
             </a>
             <hr class="border-secondary my-1">
             <small class="text-muted px-3 mb-1">LAPORAN</small>
-            <a class="nav-link text-white <?= $page_title == 'Laporan' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/laporan.php">
+            <a class="nav-link <?= $page_title == 'Laporan' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/laporan.php">
                 <i class="bi bi-graph-up me-2"></i> Laporan Keuangan
             </a>
             <hr class="border-secondary my-1">
-            <a class="nav-link text-white <?= $page_title == 'Pengaturan' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/pengaturan.php">
+            <a class="nav-link <?= $page_title == 'Pengaturan' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/pengaturan.php">
                 <i class="bi bi-gear me-2"></i> Pengaturan
             </a>
-            <a class="nav-link text-white <?= $page_title == 'Bantuan' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/bantuan.php">
+            <a class="nav-link <?= $page_title == 'Bantuan' ? 'active' : '' ?>" href="<?= $base_url ?? '.' ?>/pages/bantuan.php">
                 <i class="bi bi-question-circle me-2"></i> Bantuan
             </a>
         </nav>
     </div>
+
+    <!-- Sidebar Backdrop (mobile) -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
     <!-- Content -->
     <div class="content-wrapper flex-grow-1">

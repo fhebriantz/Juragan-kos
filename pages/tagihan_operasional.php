@@ -192,7 +192,7 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="row g-4">
     <div class="col-lg-5">
         <div class="form-wrapper">
-            <h6 class="fw-bold mb-3"><?= $edit_template ? 'Edit Template' : 'Tambah Template Baru' ?></h6>
+            <h6 class="fw-bold mb-3"><i class="bi bi-<?= $edit_template ? 'pencil-square' : 'plus-circle' ?> me-2"></i><?= $edit_template ? 'Edit Template' : 'Tambah Template Baru' ?></h6>
             <form method="POST">
                 <input type="hidden" name="action" value="<?= $edit_template ? 'edit_template' : 'tambah_template' ?>">
                 <?php if ($edit_template): ?>
@@ -258,7 +258,7 @@ require_once __DIR__ . '/../includes/header.php';
 
     <div class="col-lg-7">
         <div class="table-wrapper">
-            <h6 class="fw-bold mb-3">Daftar Template</h6>
+            <h6 class="fw-bold mb-3"><i class="bi bi-list-ul me-2"></i>Daftar Template</h6>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead>
@@ -420,7 +420,7 @@ toggleNominalTetap();
 
 <?php if ($edit_tagihan): ?>
 <div class="table-wrapper mb-3">
-    <h6 class="fw-bold mb-3">Edit Tagihan: <?= htmlspecialchars($edit_tagihan['jenis']) ?></h6>
+    <h6 class="fw-bold mb-3"><i class="bi bi-pencil-square me-2"></i>Edit Tagihan: <?= htmlspecialchars($edit_tagihan['jenis']) ?></h6>
     <form method="POST" class="row g-3 align-items-end">
         <input type="hidden" name="action" value="update_nominal">
         <input type="hidden" name="id" value="<?= $edit_tagihan['id'] ?>">
@@ -512,10 +512,10 @@ toggleNominalTetap();
                     <td class="text-center">
                         <?php if ($row['status'] === 'Belum Bayar'): ?>
                             <?php if ($row['nominal'] > 0): ?>
-                            <form method="POST" class="d-inline">
+                            <form method="POST" class="d-inline" data-confirm="Bayar <?= htmlspecialchars($row['jenis']) ?> <?= formatRupiah($row['nominal']) ?>?">
                                 <input type="hidden" name="action" value="bayar">
                                 <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                <button type="submit" class="btn btn-sm btn-success" title="Bayar" onclick="return confirm('Bayar <?= htmlspecialchars($row['jenis']) ?> <?= formatRupiah($row['nominal']) ?>?')">
+                                <button type="submit" class="btn btn-sm btn-success" title="Bayar">
                                     <i class="bi bi-check-lg"></i> Bayar
                                 </button>
                             </form>
@@ -524,10 +524,10 @@ toggleNominalTetap();
                                 <i class="bi bi-pencil"></i><?= $row['nominal'] <= 0 ? ' Isi Nominal' : '' ?>
                             </a>
                         <?php else: ?>
-                            <form method="POST" class="d-inline">
+                            <form method="POST" class="d-inline" data-confirm="Batalkan status bayar?">
                                 <input type="hidden" name="action" value="batal_bayar">
                                 <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Batalkan" onclick="return confirm('Batalkan status bayar?')">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Batalkan">
                                     <i class="bi bi-arrow-counterclockwise"></i>
                                 </button>
                             </form>

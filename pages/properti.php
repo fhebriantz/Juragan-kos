@@ -73,7 +73,7 @@ require_once __DIR__ . '/../includes/header.php';
     <!-- Form -->
     <div class="col-lg-4">
         <div class="form-wrapper">
-            <h6 class="fw-bold mb-3"><?= $edit_data ? 'Edit Properti' : 'Tambah Properti' ?></h6>
+            <h6 class="fw-bold mb-3"><i class="bi bi-<?= $edit_data ? 'pencil-square' : 'plus-circle' ?> me-2"></i><?= $edit_data ? 'Edit Properti' : 'Tambah Properti' ?></h6>
             <form method="POST">
                 <input type="hidden" name="action" value="<?= $edit_data ? 'edit' : 'tambah' ?>">
                 <?php if ($edit_data): ?>

@@ -79,7 +79,7 @@ require_once __DIR__ . '/../includes/header.php';
 
 <!-- Filter Properti -->
 <div class="mb-3 no-print">
-    <form class="d-flex gap-2 align-items-center" method="GET">
+    <form class="d-flex gap-2 align-items-center flex-wrap" method="GET">
         <label class="form-label mb-0 fw-semibold">Properti:</label>
         <select name="properti" class="form-select form-select-sm" style="width: auto; min-width: 200px;" onchange="this.form.submit()">
             <option value="">-- Semua Properti --</option>
@@ -96,7 +96,7 @@ require_once __DIR__ . '/../includes/header.php';
     <!-- Form -->
     <div class="col-lg-4">
         <div class="form-wrapper">
-            <h6 class="fw-bold mb-3"><?= $edit_data ? 'Edit Kamar' : 'Tambah Kamar' ?></h6>
+            <h6 class="fw-bold mb-3"><i class="bi bi-<?= $edit_data ? 'pencil-square' : 'plus-circle' ?> me-2"></i><?= $edit_data ? 'Edit Kamar' : 'Tambah Kamar' ?></h6>
             <form method="POST">
                 <input type="hidden" name="action" value="<?= $edit_data ? 'edit' : 'tambah' ?>">
                 <?php if ($edit_data): ?>
@@ -155,7 +155,7 @@ require_once __DIR__ . '/../includes/header.php';
     <!-- Tabel -->
     <div class="col-lg-8">
         <div class="table-wrapper">
-            <h6 class="fw-bold mb-3">Daftar Kamar</h6>
+            <h6 class="fw-bold mb-3"><i class="bi bi-door-open me-2"></i>Daftar Kamar</h6>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead>
