@@ -121,6 +121,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'hapus_tagihan') {
         $id = (int)$_POST['id'];
+        $stmt = $db->prepare("SELECT tipe, properti_id, jenis FROM tagihan_operasional WHERE id = :id");
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        $tagihan_hapus = $stmt->fetch();
+        if ($tagihan_hapus && $tagihan_hapus['tipe'] === 'Rutin') {
+            $cek = $db->prepare("SELECT COUNT(*) FROM template_tagihan WHERE properti_id = :prop AND jenis = :jenis AND aktif = 1");
+            $cek->bindValue(':prop', $tagihan_hapus['properti_id'], PDO::PARAM_INT);
+            $cek->bindValue(':jenis', $tagihan_hapus['jenis'], PDO::PARAM_STR);
+            $cek->execute();
+            if ($cek->fetchColumn() > 0) {
+                header('Location: tagihan_operasional.php?pesan=gagal_hapus_rutin' . ($filter_properti ? "&properti=$filter_properti" : ''));
+                exit;
+            }
+        }
         $db->exec("DELETE FROM tagihan_operasional WHERE id = $id");
         header('Location: tagihan_operasional.php?pesan=dihapus' . ($filter_properti ? "&properti=$filter_properti" : ''));
         exit;
@@ -153,7 +167,7 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <?php if (isset($_GET['pesan'])): ?>
-    <div class="alert alert-<?= in_array($_GET['pesan'], ['template_hapus', 'dihapus', 'batal_bayar']) ? 'warning' : 'success' ?> alert-dismissible fade show" role="alert">
+    <div class="alert alert-<?= in_array($_GET['pesan'], ['template_hapus', 'dihapus', 'batal_bayar']) ? 'warning' : ($_GET['pesan'] === 'gagal_hapus_rutin' ? 'danger' : 'success') ?> alert-dismissible fade show" role="alert">
         <?php
         echo match($_GET['pesan']) {
             'template_ok' => 'Template tagihan berhasil disimpan!',
@@ -163,6 +177,7 @@ require_once __DIR__ . '/../includes/header.php';
             'dibayar' => '<i class="bi bi-check-circle me-1"></i> Tagihan ditandai <strong>Sudah Bayar</strong> & dicatat ke pengeluaran!',
             'batal_bayar' => 'Status tagihan dikembalikan ke Belum Bayar.',
             'dihapus' => 'Tagihan berhasil dihapus.',
+            'gagal_hapus_rutin' => '<i class="bi bi-exclamation-triangle me-1"></i> Tagihan rutin tidak bisa dihapus. Nonaktifkan atau hapus template-nya di tab <strong>Kelola Rutin</strong>.',
             default => 'Berhasil!'
         };
         ?>
@@ -461,6 +476,13 @@ toggleNominalTetap();
             </thead>
             <tbody>
                 <?php
+                // Ambil daftar template aktif untuk cek apakah tagihan rutin masih punya template
+                $template_aktif = [];
+                $tmpl_aktif = $db->query("SELECT properti_id, jenis FROM template_tagihan WHERE aktif = 1");
+                while ($ta = $tmpl_aktif->fetch()) {
+                    $template_aktif[$ta['properti_id'] . '|' . $ta['jenis']] = true;
+                }
+
                 $where_parts = [];
                 if ($filter_properti) $where_parts[] = "t.properti_id = $filter_properti";
                 if ($filter_status) $where_parts[] = "t.status = '" . dbEscape($filter_status) . "'";
@@ -534,11 +556,15 @@ toggleNominalTetap();
                                 </button>
                             </form>
                         <?php endif; ?>
+                        <?php
+                        $punya_template = $row['tipe'] === 'Rutin' && isset($template_aktif[$row['properti_id'] . '|' . $row['jenis']]);
+                        if (!$punya_template): ?>
                         <form method="POST" class="d-inline">
                             <input type="hidden" name="action" value="hapus_tagihan">
                             <input type="hidden" name="id" value="<?= $row['id'] ?>">
                             <button type="submit" class="btn btn-sm btn-outline-danger btn-delete"><i class="bi bi-trash"></i></button>
                         </form>
+                        <?php endif; ?>
                     </td>
                 </tr>
                 <?php endwhile; ?>
