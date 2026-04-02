@@ -37,6 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: properti.php?pesan=gagal_hapus');
             exit;
         }
+        // Lepas referensi di tabel child agar tidak kena foreign key constraint
+        $db->exec("UPDATE pemasukan SET properti_id = NULL WHERE properti_id = $id");
+        $db->exec("UPDATE pengeluaran SET properti_id = NULL WHERE properti_id = $id");
+        $db->exec("UPDATE maintenance SET properti_id = NULL WHERE properti_id = $id");
+        $db->exec("DELETE FROM template_tagihan WHERE properti_id = $id");
+        $db->exec("DELETE FROM tagihan_operasional WHERE properti_id = $id");
         $db->exec("DELETE FROM properti WHERE id = $id");
         header('Location: properti.php?pesan=dihapus');
         exit;

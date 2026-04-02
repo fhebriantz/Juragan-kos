@@ -140,7 +140,7 @@ if ($db_driver === 'mysql') {
         status VARCHAR(50) NOT NULL DEFAULT 'Aktif',
         catatan TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (kamar_id) REFERENCES kamar(id)
+        FOREIGN KEY (kamar_id) REFERENCES kamar(id) ON DELETE SET NULL
     ) ENGINE=InnoDB");
 
     $db->exec("CREATE TABLE IF NOT EXISTS pemasukan (
@@ -155,9 +155,9 @@ if ($db_driver === 'mysql') {
         periode_bulan VARCHAR(20),
         metode_bayar VARCHAR(50) DEFAULT 'Tunai',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (properti_id) REFERENCES properti(id),
-        FOREIGN KEY (penyewa_id) REFERENCES penyewa(id),
-        FOREIGN KEY (kamar_id) REFERENCES kamar(id)
+        FOREIGN KEY (properti_id) REFERENCES properti(id) ON DELETE SET NULL,
+        FOREIGN KEY (penyewa_id) REFERENCES penyewa(id) ON DELETE SET NULL,
+        FOREIGN KEY (kamar_id) REFERENCES kamar(id) ON DELETE SET NULL
     ) ENGINE=InnoDB");
 
     $db->exec("CREATE TABLE IF NOT EXISTS pengeluaran (
@@ -172,8 +172,8 @@ if ($db_driver === 'mysql') {
         no_meter VARCHAR(100),
         id_pelanggan VARCHAR(100),
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (properti_id) REFERENCES properti(id),
-        FOREIGN KEY (kamar_id) REFERENCES kamar(id)
+        FOREIGN KEY (properti_id) REFERENCES properti(id) ON DELETE SET NULL,
+        FOREIGN KEY (kamar_id) REFERENCES kamar(id) ON DELETE SET NULL
     ) ENGINE=InnoDB");
 
     $db->exec("CREATE TABLE IF NOT EXISTS maintenance (
@@ -187,8 +187,8 @@ if ($db_driver === 'mysql') {
         tanggal DATE NOT NULL,
         status VARCHAR(50) NOT NULL DEFAULT 'Selesai',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (properti_id) REFERENCES properti(id),
-        FOREIGN KEY (kamar_id) REFERENCES kamar(id)
+        FOREIGN KEY (properti_id) REFERENCES properti(id) ON DELETE SET NULL,
+        FOREIGN KEY (kamar_id) REFERENCES kamar(id) ON DELETE SET NULL
     ) ENGINE=InnoDB");
 
     $db->exec("CREATE TABLE IF NOT EXISTS template_tagihan (
@@ -268,7 +268,7 @@ if ($db_driver === 'mysql') {
         status TEXT NOT NULL DEFAULT 'Aktif',
         catatan TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (kamar_id) REFERENCES kamar(id)
+        FOREIGN KEY (kamar_id) REFERENCES kamar(id) ON DELETE SET NULL
     )");
 
     $db->exec("CREATE TABLE IF NOT EXISTS pemasukan (
@@ -283,9 +283,9 @@ if ($db_driver === 'mysql') {
         periode_bulan TEXT,
         metode_bayar TEXT DEFAULT 'Tunai',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (properti_id) REFERENCES properti(id),
-        FOREIGN KEY (penyewa_id) REFERENCES penyewa(id),
-        FOREIGN KEY (kamar_id) REFERENCES kamar(id)
+        FOREIGN KEY (properti_id) REFERENCES properti(id) ON DELETE SET NULL,
+        FOREIGN KEY (penyewa_id) REFERENCES penyewa(id) ON DELETE SET NULL,
+        FOREIGN KEY (kamar_id) REFERENCES kamar(id) ON DELETE SET NULL
     )");
 
     $db->exec("CREATE TABLE IF NOT EXISTS pengeluaran (
@@ -300,8 +300,8 @@ if ($db_driver === 'mysql') {
         no_meter TEXT,
         id_pelanggan TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (properti_id) REFERENCES properti(id),
-        FOREIGN KEY (kamar_id) REFERENCES kamar(id)
+        FOREIGN KEY (properti_id) REFERENCES properti(id) ON DELETE SET NULL,
+        FOREIGN KEY (kamar_id) REFERENCES kamar(id) ON DELETE SET NULL
     )");
 
     $db->exec("CREATE TABLE IF NOT EXISTS maintenance (
@@ -315,8 +315,8 @@ if ($db_driver === 'mysql') {
         tanggal DATE NOT NULL,
         status TEXT NOT NULL DEFAULT 'Selesai',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (properti_id) REFERENCES properti(id),
-        FOREIGN KEY (kamar_id) REFERENCES kamar(id)
+        FOREIGN KEY (properti_id) REFERENCES properti(id) ON DELETE SET NULL,
+        FOREIGN KEY (kamar_id) REFERENCES kamar(id) ON DELETE SET NULL
     )");
 
     $db->exec("CREATE TABLE IF NOT EXISTS template_tagihan (

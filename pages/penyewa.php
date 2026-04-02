@@ -100,6 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($kamar_id) {
             $db->exec("UPDATE kamar SET status = 'Kosong' WHERE id = $kamar_id");
         }
+        // Lepas referensi di pemasukan agar tidak kena foreign key constraint
+        $db->exec("UPDATE pemasukan SET penyewa_id = NULL WHERE penyewa_id = $id");
         $db->exec("DELETE FROM penyewa WHERE id = $id");
         header('Location: penyewa.php?pesan=dihapus' . ($filter_properti ? "&properti=$filter_properti" : ''));
         exit;

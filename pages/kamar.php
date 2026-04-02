@@ -41,6 +41,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'hapus') {
         $id = (int)$_POST['id'];
+        // Cek apakah ada penyewa aktif di kamar ini
+        $jml_penyewa = dbValue("SELECT COUNT(*) FROM penyewa WHERE kamar_id = $id AND status = 'Aktif'");
+        if ($jml_penyewa > 0) {
+            $redir = $filter_properti ? "kamar.php?properti=$filter_properti&pesan=gagal_hapus" : "kamar.php?pesan=gagal_hapus";
+            header("Location: $redir");
+            exit;
+        }
+        // Lepas referensi di tabel child agar tidak kena foreign key constraint
+        $db->exec("UPDATE penyewa SET kamar_id = NULL WHERE kamar_id = $id");
+        $db->exec("UPDATE pemasukan SET kamar_id = NULL WHERE kamar_id = $id");
+        $db->exec("UPDATE pengeluaran SET kamar_id = NULL WHERE kamar_id = $id");
+        $db->exec("UPDATE maintenance SET kamar_id = NULL WHERE kamar_id = $id");
         $db->exec("DELETE FROM kamar WHERE id = $id");
         $redir = $filter_properti ? "kamar.php?properti=$filter_properti&pesan=dihapus" : "kamar.php?pesan=dihapus";
         header("Location: $redir");

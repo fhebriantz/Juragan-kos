@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS penyewa (
     status VARCHAR(50) NOT NULL DEFAULT 'Aktif',
     catatan TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (kamar_id) REFERENCES kamar(id)
+    FOREIGN KEY (kamar_id) REFERENCES kamar(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS pemasukan (
@@ -66,9 +66,9 @@ CREATE TABLE IF NOT EXISTS pemasukan (
     periode_bulan VARCHAR(20),
     metode_bayar VARCHAR(50) DEFAULT 'Tunai',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (properti_id) REFERENCES properti(id),
-    FOREIGN KEY (penyewa_id) REFERENCES penyewa(id),
-    FOREIGN KEY (kamar_id) REFERENCES kamar(id)
+    FOREIGN KEY (properti_id) REFERENCES properti(id) ON DELETE SET NULL,
+    FOREIGN KEY (penyewa_id) REFERENCES penyewa(id) ON DELETE SET NULL,
+    FOREIGN KEY (kamar_id) REFERENCES kamar(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS pengeluaran (
@@ -83,8 +83,8 @@ CREATE TABLE IF NOT EXISTS pengeluaran (
     no_meter VARCHAR(100),
     id_pelanggan VARCHAR(100),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (properti_id) REFERENCES properti(id),
-    FOREIGN KEY (kamar_id) REFERENCES kamar(id)
+    FOREIGN KEY (properti_id) REFERENCES properti(id) ON DELETE SET NULL,
+    FOREIGN KEY (kamar_id) REFERENCES kamar(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS maintenance (
@@ -98,8 +98,8 @@ CREATE TABLE IF NOT EXISTS maintenance (
     tanggal DATE NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'Selesai',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (properti_id) REFERENCES properti(id),
-    FOREIGN KEY (kamar_id) REFERENCES kamar(id)
+    FOREIGN KEY (properti_id) REFERENCES properti(id) ON DELETE SET NULL,
+    FOREIGN KEY (kamar_id) REFERENCES kamar(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS template_tagihan (
