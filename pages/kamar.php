@@ -76,10 +76,17 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <?php if (isset($_GET['pesan'])): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        Data kamar berhasil <?= $_GET['pesan'] === 'dihapus' ? 'dihapus' : 'disimpan' ?>!
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+    <?php if ($_GET['pesan'] === 'gagal_hapus'): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            Tidak bisa menghapus kamar karena masih ada penyewa aktif!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php else: ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            Data kamar berhasil <?= $_GET['pesan'] === 'dihapus' ? 'dihapus' : 'disimpan' ?>!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
 <?php endif; ?>
 
 <?php if (empty($properti_list)): ?>
